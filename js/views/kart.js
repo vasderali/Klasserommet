@@ -102,32 +102,33 @@ function applyPreset(cls, chart, kind) {
 function presetDesks(kind, n) {
   const out = [];
   const push = (x, y) => out.push({ id: store.uid(), x: Math.round(x), y: Math.round(y), sid: null });
+  // Tavla er nederst, så raden med lavest y er bakerst i rommet.
   if (kind === 'rows2') {
     const m = Math.ceil(n / 2);
     for (let p = 0; p < m; p++) {
       const col = p % 3, row = Math.floor(p / 3);
-      const x = 106 + col * 264, y = 110 + row * 104;
+      const x = 106 + col * 264, y = 24 + row * 104;
       push(x, y); push(x + DW, y);
     }
   } else if (kind === 'rows1') {
     for (let i = 0; i < n; i++) {
-      push(87 + (i % 6) * 135, 110 + Math.floor(i / 6) * 104);
+      push(87 + (i % 6) * 135, 24 + Math.floor(i / 6) * 104);
     }
   } else if (kind === 'u') {
+    // Hestesko som åpner seg mot tavla: lukket rad bakerst, armene ned mot tavla.
     const b = Math.min(7, Math.max(3, Math.round(n / 3)));
     const rest = Math.max(0, n - b);
     const L = Math.ceil(rest / 2), R = rest - L;
-    for (let i = 0; i < L; i++) push(32, 110 + i * 84);
-    for (let i = 0; i < R; i++) push(818, 110 + i * 84);
-    const y = 110 + Math.max(L, R) * 84 + 20;
     for (let i = 0; i < b; i++) {
-      push(b === 1 ? (W - DW) / 2 : 32 + i * ((818 - 32) / (b - 1)), y);
+      push(b === 1 ? (W - DW) / 2 : 32 + i * ((818 - 32) / (b - 1)), 24);
     }
+    for (let i = 0; i < L; i++) push(32, 108 + i * 84);
+    for (let i = 0; i < R; i++) push(818, 108 + i * 84);
   } else if (kind === 'g4') {
     const c = Math.ceil(n / 4);
     for (let k = 0; k < c; k++) {
       const col = k % 3, row = Math.floor(k / 3);
-      const x = 75 + col * 295, y = 110 + row * 198;
+      const x = 75 + col * 295, y = 24 + row * 198;
       push(x, y); push(x + DW, y); push(x, y + DH); push(x + DW, y + DH);
     }
   }
@@ -139,7 +140,7 @@ function overlapsAny(id, desks, x, y) {
 }
 
 function findFreeSpot(desks) {
-  for (let y = 64; y < 1800; y += 24) {
+  for (let y = 16; y < 1800; y += 24) {
     for (let x = 8; x <= W - DW - 8; x += 24) {
       if (!overlapsAny(null, desks, x, y)) return { x, y };
     }
@@ -162,7 +163,7 @@ function resolveCollision(id, desks, x, y) {
     ];
     for (const c of cands) {
       const cx = Math.min(Math.max(c.x, 0), W - DW);
-      const cy = Math.max(c.y, 56);
+      const cy = Math.max(c.y, 8);
       if (overlapsAny(id, desks, cx, cy)) continue;
       const dist = (cx - x) ** 2 + (cy - y) ** 2;
       if (dist < bestDist) { bestDist = dist; best = { x: cx, y: cy }; }
@@ -243,10 +244,12 @@ function buildHistory(cls) {
 function renderBoard(desks, cls, chart) {
   const interactive = !!chart;
   const nameOf = id => cls.students.find(s => s.id === id)?.name || '';
-  const H = Math.max(520, desks.reduce((m, d) => Math.max(m, d.y + DH), 0) + 70);
+  // Tavla ligger nederst – kartet vises fra lærerens perspektiv, og flytter
+  // seg lenger ned hvis pulter dras nedover.
+  const H = Math.max(520, desks.reduce((m, d) => Math.max(m, d.y + DH), 0) + 130);
   const wrap = h('div', { class: 'board-wrap' + (interactive ? '' : ' readonly') });
   const board = h('div', { class: 'board', style: `width:${W}px;height:${H}px` });
-  board.append(h('div', { class: 'board-front' }, 'TAVLE'));
+  board.append(h('div', { class: 'board-front', style: `top:${H - 44}px` }, 'TAVLE'));
   for (const d of desks) {
     const name = d.sid ? nameOf(d.sid) : '';
     board.append(h('div', {
@@ -319,10 +322,10 @@ function attachPointer(board, desks, cls, chart) {
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 7) drag.moved = true;
     if (drag.moved) {
       const rawX = Math.min(Math.max(Math.round(drag.ox + dx), 0), W - DW);
-      const rawY = Math.max(Math.round(drag.oy + dy), 56);
+      const rawY = Math.max(Math.round(drag.oy + dy), 8);
       const m = magnet(drag.d.id, desks, rawX, rawY);
       drag.d.x = Math.min(Math.max(m.x, 0), W - DW);
-      drag.d.y = Math.max(m.y, 56);
+      drag.d.y = Math.max(m.y, 8);
       drag.snapped = m.snapped;
       drag.el.classList.toggle('snap', m.snapped);
       drag.el.style.left = drag.d.x + 'px';

@@ -343,7 +343,6 @@ textarea.input { width: 100%; resize: vertical; }
 
 .board-front {
   position: absolute;
-  top: 14px;
   left: 25%;
   width: 50%;
   height: 30px;
