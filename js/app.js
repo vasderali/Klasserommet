@@ -5,15 +5,17 @@ import * as kart from './views/kart.js';
 import * as grupper from './views/grupper.js';
 import * as trekker from './views/trekker.js';
 import * as timer from './views/timer.js';
+import * as timeplan from './views/timeplan.js';
 import * as klasser from './views/klasser.js';
 
-const views = { verktoy, kart, grupper, trekker, timer, klasser };
-const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer']);
+const views = { verktoy, kart, grupper, trekker, timer, timeplan, klasser };
+const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan']);
 const TOOL_TABS = [
   ['kart', '🪑 Kart'],
   ['grupper', '👥 Grupper'],
   ['trekker', '🎲 Trekker'],
   ['timer', '⏱️ Timer'],
+  ['timeplan', '📅 Plan'],
 ];
 
 const main = document.getElementById('view');

@@ -14,6 +14,8 @@ ingen innlogging, ingen server.
 - **Trekker** – trekk elevnavn uten tilbakelegging; alle trekkes én gang før
   noen trekkes igjen. Fravær kan markeres.
 - **Timer** – stor nedtelling for tavla/projektoren, med tavlemodus.
+- **Timeplan** – ukeplan med fargekodede fag, per klasse eller trinn.
+  Lagres lokalt som alt annet; deles via eksport/import.
 - **Klasser** – lim inn klasselister (ett navn per linje), regler for hvem som
   ikke skal sammen, og eksport/import av sikkerhetskopi.
 

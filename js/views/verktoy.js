@@ -6,6 +6,7 @@ const TOOLS = [
   ['grupper', '👥', 'Grupper', 'Tilfeldige grupper som unngår de samme parene som sist.'],
   ['trekker', '🎲', 'Trekker', 'Trekk elevnavn – alle trekkes én gang før noen trekkes igjen.'],
   ['timer', '⏱️', 'Timer', 'Stor nedtelling for tavla og projektoren, med tavlemodus.'],
+  ['timeplan', '📅', 'Timeplan', 'Ukeplan med fargekodede fag – for klassen eller hele trinnet.'],
 ];
 
 export function render(root) {

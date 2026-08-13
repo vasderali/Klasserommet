@@ -3,7 +3,7 @@ const KEY = 'klasserommet:v1';
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
 function blank() {
-  return { classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {}, currentClassId: null };
+  return { classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {}, timetables: {}, currentClassId: null };
 }
 
 let state = load();
@@ -45,6 +45,7 @@ export const store = {
     delete state.chartHistory[id];
     delete state.groupHistory[id];
     delete state.picker[id];
+    delete state.timetables[id];
     if (state.currentClassId === id) state.currentClassId = state.classes[0]?.id ?? null;
     emit();
   },
@@ -95,6 +96,9 @@ export const store = {
 
   picker(cid) { return state.picker[cid] || (state.picker[cid] = { drawn: [], absent: [] }); },
   savePicker() { emit(); },
+
+  timetable(cid) { return state.timetables[cid] || null; },
+  setTimetable(cid, tt) { state.timetables[cid] = tt; emit(); },
 
   exportJson() { return JSON.stringify(state, null, 2); },
   importJson(text) {

@@ -10,6 +10,11 @@ let selected = null;
 let snapshotView = null;
 let refit = null;
 let resizeHooked = false;
+const deskCounts = {}; // cid -> valgt antall pulter for nye oppsett
+
+function countFor(cls) {
+  return deskCounts[cls.id] ?? Math.max(cls.students.length || 24, 1);
+}
 
 export function render(root) {
   if (!resizeHooked) {
@@ -51,6 +56,11 @@ function buildEditor(cls) {
 
   box.append(h('div', { class: 'toolbar no-print' },
     presetSel,
+    h('div', { class: 'stepper' },
+      h('span', { class: 'muted small' }, 'Pulter'),
+      h('button', { class: 'btn', onclick: () => { deskCounts[cls.id] = Math.max(1, countFor(cls) - 1); rr(); } }, '−'),
+      h('span', { class: 'stepper-val' }, String(countFor(cls))),
+      h('button', { class: 'btn', onclick: () => { deskCounts[cls.id] = Math.min(40, countFor(cls) + 1); rr(); } }, '+')),
     h('button', { class: 'btn', onclick: () => addDesk(cls, chart) }, '+ Pult'),
     h('button', { class: 'btn primary', onclick: () => fill(cls, chart) }, '🎲 Fyll tilfeldig'),
     h('button', { class: 'btn', onclick: () => {
@@ -65,16 +75,24 @@ function buildEditor(cls) {
   if (selected) {
     const d = chart.desks.find(x => x.id === selected);
     const sName = cls.students.find(s => s.id === d.sid)?.name;
+    const placed = new Set(chart.desks.map(x => x.sid).filter(Boolean));
+    const unplaced = cls.students.filter(s => !placed.has(s.id));
     box.append(h('div', { class: 'contextbar no-print' },
       h('span', {}, sName ? `Valgt: ${sName}` : 'Valgt: ledig pult'),
-      h('span', { class: 'muted' }, 'trykk på en annen pult for å bytte plass'),
+      h('span', { class: 'muted' }, unplaced.length
+        ? 'velg elev nedenfor, eller trykk på en annen pult for å bytte plass'
+        : 'trykk på en annen pult for å bytte plass'),
       d.sid && h('button', { class: 'btn small', onclick: () => {
         d.sid = null; selected = null; store.setChart(cls.id, chart); rr();
       } }, 'Fjern navn'),
       h('button', { class: 'btn small danger', onclick: () => {
         chart.desks = chart.desks.filter(x => x.id !== selected);
         selected = null; store.setChart(cls.id, chart); rr();
-      } }, 'Fjern pult')));
+      } }, 'Fjern pult'),
+      unplaced.length ? h('div', { class: 'chips', style: 'flex-basis:100%;margin-top:2px' },
+        unplaced.map(s => h('button', { class: 'chip', onclick: () => {
+          d.sid = s.id; selected = null; store.setChart(cls.id, chart); rr();
+        } }, s.name))) : null));
   }
 
   box.append(h('div', { class: 'print-caption' },
@@ -93,8 +111,7 @@ function buildEditor(cls) {
 function applyPreset(cls, chart, kind) {
   if (!kind) return;
   if (chart.desks.some(d => d.sid) && !confirm('Erstatte dagens kart? Navnene på pultene fjernes.')) { rr(); return; }
-  const n = Math.max(cls.students.length, 12);
-  store.setChart(cls.id, { desks: presetDesks(kind, n) });
+  store.setChart(cls.id, { desks: presetDesks(kind, countFor(cls)) });
   selected = null;
   rr();
 }
