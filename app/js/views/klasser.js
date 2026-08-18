@@ -1,6 +1,8 @@
 import { store } from '../store.js';
 import { h, toast, rerenderView as rr } from '../ui.js';
 import { pairKey } from '../engine.js';
+import { staticBoard } from './kart.js';
+import { staticGrid } from './timeplan.js';
 
 let adding = false;
 let editId = null;
@@ -45,15 +47,53 @@ function addForm(first) {
 }
 
 function classCard(c) {
+  const ruleCount = (c.apart || []).length + (c.together || []).length + (c.front || []).length;
   return h('div', { class: 'panel row spread' },
     h('div', {},
       h('strong', {}, c.name),
-      h('div', { class: 'muted small' }, `${c.students.length} elever · ${(c.apart || []).length} regler`)),
-    h('div', { class: 'row' },
+      h('div', { class: 'muted small' }, `${c.students.length} elever · ${ruleCount} regler`)),
+    h('div', { class: 'row wrap' },
+      h('button', { class: 'btn', onclick: () => vikarPrint(c) }, '🖨 Vikarpakke'),
       h('button', { class: 'btn', onclick: () => { editId = c.id; adding = false; rr(); } }, 'Rediger'),
       h('button', { class: 'btn danger', onclick: () => {
         if (confirm(`Slette klassen «${c.name}»? Kart og historikk slettes også.`)) { store.deleteClass(c.id); rr(); }
       } }, 'Slett')));
+}
+
+// Vikarpakken: klassekart + regler + timeplan på ett utskrivbart ark.
+function vikarPrint(c) {
+  const chart = store.chart(c.id);
+  const tt = store.timetable(c.id);
+  const nameOf = id => c.students.find(s => s.id === id)?.name || '?';
+  const rules = [
+    ...(c.apart || []).map(([a, b]) => `${nameOf(a)} og ${nameOf(b)} skal ikke sitte sammen`),
+    ...(c.together || []).map(([a, b]) => `${nameOf(a)} og ${nameOf(b)} skal sitte sammen`),
+    ...(c.front || []).map(sid => `${nameOf(sid)} skal sitte foran`),
+  ];
+  if (!(chart && chart.desks.some(d => d.sid)) && !tt) {
+    toast('Klassen har verken klassekart eller timeplan ennå.');
+    return;
+  }
+  const box = h('div', { class: 'vikar-print' },
+    h('h1', {}, `${c.name} – til vikaren`),
+    h('p', { class: 'muted' },
+      new Date().toLocaleDateString('nb-NO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })),
+    chart && chart.desks.some(d => d.sid) ? [
+      h('h2', {}, 'Klassekart (tavla nederst – sett fra deg)'),
+      staticBoard(chart.desks, c),
+    ] : null,
+    rules.length ? [
+      h('h2', {}, 'Verdt å vite'),
+      h('ul', {}, rules.map(r => h('li', {}, r))),
+    ] : null,
+    tt && tt.rows.length ? [
+      h('h2', {}, 'Timeplan'),
+      staticGrid(tt),
+    ] : null);
+  document.body.append(box);
+  document.body.classList.add('print-vikar');
+  window.print();
+  setTimeout(() => { box.remove(); document.body.classList.remove('print-vikar'); }, 2000);
 }
 
 function editCard(c) {
@@ -62,6 +102,10 @@ function editCard(c) {
   const addIn = h('textarea', { class: 'input', rows: 2, placeholder: 'Legg til elever – ett navn per linje' });
   const selA = h('select', { class: 'input', 'aria-label': 'Første elev i regelen' }, c.students.map(s => h('option', { value: s.id }, s.name)));
   const selB = h('select', { class: 'input', 'aria-label': 'Andre elev i regelen' }, c.students.map(s => h('option', { value: s.id }, s.name)));
+  const typeSel = h('select', { class: 'input', 'aria-label': 'Regeltype' },
+    h('option', { value: 'apart' }, 'skal IKKE sitte sammen'),
+    h('option', { value: 'together' }, 'skal sitte sammen'));
+  const selFront = h('select', { class: 'input', 'aria-label': 'Elev som skal sitte foran' }, c.students.map(s => h('option', { value: s.id }, s.name)));
   const nameOf = id => c.students.find(s => s.id === id)?.name || '?';
   return h('div', { class: 'panel form-col' },
     h('div', { class: 'row spread' },
@@ -80,22 +124,46 @@ function editCard(c) {
         store.addStudents(c.id, names);
         rr();
       } }, 'Legg til')),
-    h('h4', {}, 'Regler: skal ikke sitte eller være i gruppe sammen'),
+    h('h4', {}, 'Regler for plassering og grupper'),
     c.students.length < 2
       ? h('p', { class: 'muted' }, 'Legg til minst to elever for å lage regler.')
-      : h('div', { class: 'row wrap' },
+      : [
+        h('div', { class: 'row wrap' },
           selA, h('span', {}, 'og'), selB,
+          typeSel,
           h('button', { class: 'btn', onclick: () => {
             const a = selA.value, b = selB.value;
             if (a === b) { toast('Velg to forskjellige elever.'); return; }
-            if ((c.apart || []).some(([x, y]) => pairKey(x, y) === pairKey(a, b))) { toast('Regelen finnes allerede.'); return; }
-            store.addRule(c.id, a, b);
+            const list = typeSel.value === 'apart' ? (c.apart || []) : (c.together || []);
+            if (list.some(([x, y]) => pairKey(x, y) === pairKey(a, b))) { toast('Regelen finnes allerede.'); return; }
+            if (typeSel.value === 'apart') store.addRule(c.id, a, b);
+            else store.addTogether(c.id, a, b);
             rr();
-          } }, 'Legg til regel')),
-    (c.apart || []).length ? h('div', { class: 'rules' }, c.apart.map(([a, b], i) =>
-      h('div', { class: 'rule row spread' },
-        h('span', {}, `${nameOf(a)} ↔ ${nameOf(b)}`),
-        h('button', { class: 'btn small', 'aria-label': `Fjern regelen ${nameOf(a)} og ${nameOf(b)}`, onclick: () => { store.removeRule(c.id, i); rr(); } }, '✕')))) : null);
+          } }, 'Legg til')),
+        h('div', { class: 'row wrap' },
+          selFront,
+          h('button', { class: 'btn', onclick: () => {
+            const sid = selFront.value;
+            if ((c.front || []).includes(sid)) { toast('Regelen finnes allerede.'); return; }
+            store.addFront(c.id, sid);
+            rr();
+          } }, 'Skal sitte foran')),
+      ],
+    ((c.apart || []).length || (c.together || []).length || (c.front || []).length)
+      ? h('div', { class: 'rules' },
+        (c.apart || []).map(([a, b], i) =>
+          h('div', { class: 'rule row spread' },
+            h('span', {}, `${nameOf(a)} ✕ ${nameOf(b)} – ikke sammen`),
+            h('button', { class: 'btn small', 'aria-label': `Fjern regelen ${nameOf(a)} og ${nameOf(b)} ikke sammen`, onclick: () => { store.removeRule(c.id, i); rr(); } }, '✕'))),
+        (c.together || []).map(([a, b], i) =>
+          h('div', { class: 'rule row spread' },
+            h('span', {}, `${nameOf(a)} + ${nameOf(b)} – skal sitte sammen`),
+            h('button', { class: 'btn small', 'aria-label': `Fjern regelen ${nameOf(a)} og ${nameOf(b)} sammen`, onclick: () => { store.removeTogether(c.id, i); rr(); } }, '✕'))),
+        (c.front || []).map((sid, i) =>
+          h('div', { class: 'rule row spread' },
+            h('span', {}, `${nameOf(sid)} – skal sitte foran`),
+            h('button', { class: 'btn small', 'aria-label': `Fjern regelen ${nameOf(sid)} foran`, onclick: () => { store.removeFront(c.id, i); rr(); } }, '✕'))))
+      : null);
 }
 
 function dataPanel() {

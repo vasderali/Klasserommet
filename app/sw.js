@@ -1,6 +1,6 @@
 // Cache-først med oppdatering i bakgrunnen: appen virker uten nett i
 // klasserommet, og nye versjoner hentes stille neste gang det er nett.
-const VERSION = 'klasserommet-v8';
+const VERSION = 'klasserommet-v9';
 
 const ASSETS = [
   '.',
@@ -20,6 +20,8 @@ const ASSETS = [
   'js/views/timer.js',
   'js/views/timeplan.js',
   'js/views/aktiviteter.js',
+  'js/views/tavle.js',
+  'js/views/stoy.js',
   'js/views/klasser.js',
   'icons/favicon.svg',
   'icons/icon-180.png',

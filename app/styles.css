@@ -454,6 +454,7 @@ textarea.input { width: 100%; resize: vertical; }
 }
 
 .desk.free { border-style: dashed; color: var(--muted); font-weight: 400; background: rgba(255, 255, 255, .55); }
+.desk-lock { position: absolute; top: 2px; right: 5px; font-size: 10px; }
 .desk.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 161, 58, .35); }
 .desk.snap { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(30, 107, 82, .25); }
 .board-wrap.readonly .desk { cursor: default; }
@@ -673,6 +674,140 @@ main.view-enter[data-dir="b"] > * { animation-name: viewInB; }
   .timer-digits.urgent { animation: none; }
   .timer-digits.done { animation: none; visibility: visible; }
   .tool-card, .btn { transition: none; }
+}
+
+/* ---------- Tavlemodus (dagens plan) ---------- */
+
+.tavle-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tavle-clock { font-size: clamp(44px, 7vw, 80px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.tavle-date { font-size: 16px; margin-top: 4px; }
+
+.tavle-agenda { display: flex; flex-direction: column; gap: 8px; }
+
+.tavle-item {
+  display: grid;
+  grid-template-columns: 34px 110px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tavle-item.empty { border-style: dashed; color: var(--muted); background: transparent; }
+.tavle-item.done { opacity: .5; }
+.tavle-item.done .tavle-fag { text-decoration: line-through; }
+.tavle-item[disabled] { cursor: default; }
+
+.tavle-check {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--brand);
+  background: var(--surface);
+}
+
+.tavle-label { font-weight: 600; color: var(--muted); font-size: 14px; }
+.tavle-fag { font-weight: 700; font-size: 17px; }
+.tavle-detalj { font-size: 14px; }
+
+.tavle-pause {
+  padding: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: repeating-linear-gradient(-45deg, #eae6db, #eae6db 8px, #f0ece2 8px, #f0ece2 16px);
+  border-radius: 8px;
+}
+
+.tavle-view.full {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  margin: 0;
+  padding: calc(20px + env(safe-area-inset-top)) 30px 30px;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.tavle-view.full .tavle-clock { font-size: clamp(70px, 10vw, 130px); }
+.tavle-view.full .tavle-fag { font-size: clamp(19px, 2.6vw, 30px); }
+.tavle-view.full .tavle-item { padding: 18px 22px; }
+.tavle-exit { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 18px; z-index: 61; }
+
+/* ---------- Støymåler ---------- */
+
+.stoy-panel {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 20px;
+  flex-wrap: wrap;
+}
+
+.trafikklys {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #2b3530;
+  padding: 18px;
+  border-radius: 20px;
+}
+
+.lys { width: 64px; height: 64px; border-radius: 50%; opacity: .18; transition: opacity .25s, box-shadow .25s; }
+.lys.rod { background: #e04a2e; }
+.lys.gul { background: #f0b23e; }
+.lys.gronn { background: #3fa46f; }
+.lys.aktiv { opacity: 1; box-shadow: 0 0 26px 4px currentColor; }
+.lys.rod.aktiv { color: rgba(224, 74, 46, .55); }
+.lys.gul.aktiv { color: rgba(240, 178, 62, .55); }
+.lys.gronn.aktiv { color: rgba(63, 164, 111, .55); }
+
+.stoy-status { display: flex; flex-direction: column; gap: 10px; min-width: 240px; max-width: 380px; flex: 1; }
+.stoy-tekst { font-size: clamp(26px, 4vw, 40px); font-weight: 800; min-height: 1.3em; }
+.stoy-meter { height: 14px; border-radius: 999px; background: var(--surface-dim); overflow: hidden; }
+.stoy-meter-fill { height: 100%; width: 0; background: var(--brand); border-radius: 999px; transition: width .12s linear; }
+
+/* ---------- Vikarpakke-utskrift ---------- */
+
+.vikar-print { display: none; }
+
+@media print {
+  body.print-vikar .app-header,
+  body.print-vikar main,
+  body.print-vikar .tabbar { display: none !important; }
+  body.print-vikar .vikar-print { display: block; }
+  .vikar-print h1 { font-size: 24px; margin: 0 0 2px; }
+  .vikar-print h2 { font-size: 17px; margin: 16px 0 8px; page-break-after: avoid; }
+  .vikar-print .board-wrap {
+    height: 430px !important;
+    overflow: hidden;
+    border: none;
+    background: #fff;
+  }
+  .vikar-print .board { transform: scale(.62) !important; transform-origin: top left; background: none; }
+  .vikar-print .tt-grid { font-size: 10px; }
+  .vikar-print .tt-fag { font-size: 10px; }
+  .vikar-print ul { margin: 4px 0; }
 }
 
 /* ---------- Utskrift ---------- */

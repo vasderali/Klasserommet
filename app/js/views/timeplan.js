@@ -107,6 +107,11 @@ function copyFrom(cls, tt, srcId) {
   rr();
 }
 
+// Lesevisning av rutenettet til bruk andre steder (vikarpakken).
+export function staticGrid(tt) {
+  return grid(tt);
+}
+
 function grid(tt) {
   const g = h('div', { class: 'tt-grid' });
   g.append(h('div', {}, ''));

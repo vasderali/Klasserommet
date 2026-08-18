@@ -28,9 +28,17 @@ export function deskNeighborPairs(desks, maxDist = 150) {
 
 // historyDesks: tidligere kart (nyeste først) – de tre siste teller, med
 // synkende vekt, slik at ferske nabopar unngås sterkest.
-export function assignSeats(students, desks, apartPairs, historyDesks) {
+// rules: { apart, together, front }. fixed: deskId -> sid for låste pulter.
+export function assignSeats(students, desks, rules, historyDesks, fixed = {}) {
+  const { apart: apartPairs = [], together = [], front = [] } = rules || {};
   const neigh = deskNeighborPairs(desks);
-  const apart = new Set((apartPairs || []).map(([a, b]) => pairKey(a, b)));
+  const neighKeys = new Set(neigh.map(([a, b]) => pairKey(a, b)));
+  const apart = new Set(apartPairs.map(([a, b]) => pairKey(a, b)));
+  const frontSids = new Set(front);
+  // «Foran» = pultene nærmest tavla, som ligger nederst (størst y).
+  const maxY = desks.reduce((m, d) => Math.max(m, d.y), 0);
+  const frontDesks = new Set(desks.filter(d => d.y >= maxY - 100).map(d => d.id));
+
   const past = new Map();
   (historyDesks || []).slice(0, 3).forEach((snap, idx) => {
     const w = 3 - idx;
@@ -41,18 +49,32 @@ export function assignSeats(students, desks, apartPairs, historyDesks) {
     });
   });
 
+  const freeDesks = desks.filter(d => !(d.id in fixed));
+  const fixedSids = new Set(Object.values(fixed).filter(Boolean));
+  const freeStudents = students.filter(s => !fixedSids.has(s.id));
+
   let best = null, bestScore = Infinity, bestHard = 0;
   for (let t = 0; t < 600; t++) {
-    const order = shuffle(students.map(s => s.id));
-    const sit = {};
-    desks.forEach((d, i) => { sit[d.id] = order[i] ?? null; });
+    const order = shuffle(freeStudents.map(s => s.id));
+    const sit = { ...fixed };
+    freeDesks.forEach((d, i) => { sit[d.id] = order[i] ?? null; });
     let hard = 0, soft = 0;
+    const deskOf = {};
+    for (const [did, sid] of Object.entries(sit)) if (sid) deskOf[sid] = did;
     for (const [da, db] of neigh) {
       const a = sit[da], b = sit[db];
       if (!a || !b) continue;
       const k = pairKey(a, b);
       if (apart.has(k)) hard++;
       soft += past.get(k) || 0;
+    }
+    for (const [a, b] of together) {
+      const da = deskOf[a], db = deskOf[b];
+      if (da && db && !neighKeys.has(pairKey(da, db))) hard++;
+    }
+    for (const sid of frontSids) {
+      const did = deskOf[sid];
+      if (did && !frontDesks.has(did)) hard++;
     }
     const score = hard * 1000 + soft;
     if (score < bestScore) {

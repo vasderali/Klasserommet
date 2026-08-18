@@ -7,15 +7,19 @@ import * as trekker from './views/trekker.js';
 import * as timer from './views/timer.js';
 import * as timeplan from './views/timeplan.js';
 import * as aktiviteter from './views/aktiviteter.js';
+import * as tavle from './views/tavle.js';
+import * as stoy from './views/stoy.js';
 import * as klasser from './views/klasser.js';
 
-const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, klasser };
-const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter']);
+const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, tavle, stoy, klasser };
+const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter', 'tavle', 'stoy']);
 const TOOL_TABS = [
   ['kart', 'Kart'],
   ['grupper', 'Grupper'],
   ['trekker', 'Trekker'],
   ['timer', 'Timer'],
+  ['tavle', 'Tavle'],
+  ['stoy', 'Støy'],
   ['timeplan', 'Plan'],
   ['aktiviteter', 'Bank'],
 ];
@@ -32,7 +36,7 @@ function toolNav(active) {
 }
 
 let lastKey = null;
-const NAV_ORDER = ['verktoy', 'kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter', 'klasser'];
+const NAV_ORDER = ['verktoy', 'kart', 'grupper', 'trekker', 'timer', 'tavle', 'stoy', 'timeplan', 'aktiviteter', 'klasser'];
 
 function route() {
   const name = location.hash.replace(/^#\//, '') || 'verktoy';

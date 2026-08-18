@@ -88,6 +88,8 @@ export const store = {
     const c = this.getClass(cid); if (!c) return;
     c.students = c.students.filter(s => s.id !== sid);
     c.apart = (c.apart || []).filter(([a, b]) => a !== sid && b !== sid);
+    c.together = (c.together || []).filter(([a, b]) => a !== sid && b !== sid);
+    c.front = (c.front || []).filter(x => x !== sid);
     const chart = state.charts[cid];
     if (chart) chart.desks.forEach(d => { if (d.sid === sid) d.sid = null; });
     const p = state.picker[cid];
@@ -99,6 +101,10 @@ export const store = {
   },
   addRule(cid, a, b) { const c = this.getClass(cid); if (!c) return; (c.apart = c.apart || []).push([a, b]); emit(); },
   removeRule(cid, i) { const c = this.getClass(cid); if (!c) return; c.apart.splice(i, 1); emit(); },
+  addTogether(cid, a, b) { const c = this.getClass(cid); if (!c) return; (c.together = c.together || []).push([a, b]); emit(); },
+  removeTogether(cid, i) { const c = this.getClass(cid); if (!c) return; c.together.splice(i, 1); emit(); },
+  addFront(cid, sid) { const c = this.getClass(cid); if (!c) return; (c.front = c.front || []).push(sid); emit(); },
+  removeFront(cid, i) { const c = this.getClass(cid); if (!c) return; c.front.splice(i, 1); emit(); },
 
   chart(cid) { return state.charts[cid] || null; },
   setChart(cid, chart) { state.charts[cid] = chart; emit(); },

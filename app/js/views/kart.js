@@ -85,6 +85,9 @@ function buildEditor(cls) {
       d.sid && h('button', { class: 'btn small', onclick: () => {
         d.sid = null; selected = null; store.setChart(cls.id, chart); rr();
       } }, 'Fjern navn'),
+      h('button', { class: 'btn small', onclick: () => {
+        d.locked = !d.locked; store.setChart(cls.id, chart); rr();
+      } }, d.locked ? '🔓 Lås opp' : '🔒 Lås pult'),
       h('button', { class: 'btn small danger', onclick: () => {
         chart.desks = chart.desks.filter(x => x.id !== selected);
         selected = null; store.setChart(cls.id, chart); rr();
@@ -204,7 +207,10 @@ function fill(cls, chart) {
     return;
   }
   const hist = store.history(cls.id).map(s => s.desks);
-  const res = assignSeats(cls.students, chart.desks, cls.apart || [], hist);
+  const fixed = {};
+  chart.desks.forEach(d => { if (d.locked && d.sid) fixed[d.id] = d.sid; });
+  const res = assignSeats(cls.students, chart.desks,
+    { apart: cls.apart || [], together: cls.together || [], front: cls.front || [] }, hist, fixed);
   chart.desks.forEach(d => { d.sid = res.seating[d.id] || null; });
   store.setChart(cls.id, chart);
   selected = null;
@@ -257,6 +263,11 @@ function buildHistory(cls) {
   return box;
 }
 
+// Lesevisning av et kart til bruk andre steder (vikarpakken).
+export function staticBoard(desks, cls) {
+  return renderBoard(desks, cls, null);
+}
+
 // chart == null gir et lesevisnings-brett (historikk).
 function renderBoard(desks, cls, chart) {
   const interactive = !!chart;
@@ -275,8 +286,10 @@ function renderBoard(desks, cls, chart) {
       style: `left:${d.x}px;top:${d.y}px`,
       tabindex: interactive ? '0' : null,
       role: interactive ? 'button' : null,
-      'aria-label': interactive ? (name ? `Pult: ${name}` : 'Ledig pult') : null,
-    }, h('span', { class: 'desk-name' }, name || 'Ledig')));
+      'aria-label': interactive ? (name ? `Pult: ${name}` : 'Ledig pult') + (d.locked ? ' (låst)' : '') : null,
+    },
+      h('span', { class: 'desk-name' }, name || 'Ledig'),
+      d.locked && h('span', { class: 'desk-lock', 'aria-hidden': 'true' }, '🔒')));
   }
   wrap.append(board);
   if (interactive) attachPointer(board, desks, cls, chart);
