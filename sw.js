@@ -1,55 +1,14 @@
-// Cache-først med oppdatering i bakgrunnen: appen virker uten nett i
-// klasserommet, og nye versjoner hentes stille neste gang det er nett.
-const VERSION = 'klasserommet-v5';
-
-const ASSETS = [
-  '.',
-  'index.html',
-  'styles.css',
-  'manifest.webmanifest',
-  'js/app.js',
-  'js/store.js',
-  'js/engine.js',
-  'js/ui.js',
-  'js/fag.js',
-  'js/views/verktoy.js',
-  'js/views/kart.js',
-  'js/views/grupper.js',
-  'js/views/trekker.js',
-  'js/views/timer.js',
-  'js/views/timeplan.js',
-  'js/views/aktiviteter.js',
-  'js/views/klasser.js',
-  'icons/favicon.svg',
-  'icons/icon-180.png',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
-];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
-});
+// Gravstein-service-worker: appen bodde tidligere på roten. Denne avregistrerer
+// den gamle installasjonen, tømmer gamle cacher og laster klientene på nytt,
+// slik at eksisterende hjemskjerm-installasjoner får ny struktur (/app/).
+self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(hit => {
-      const net = fetch(e.request).then(res => {
-        if (res.ok && new URL(e.request.url).origin === location.origin) {
-          const copy = res.clone();
-          caches.open(VERSION).then(c => c.put(e.request, copy));
-        }
-        return res;
-      }).catch(() => hit);
-      return hit || net;
-    })
-  );
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+    await self.registration.unregister();
+    const clients = await self.clients.matchAll({ type: 'window' });
+    clients.forEach(c => c.navigate(c.url));
+  })());
 });

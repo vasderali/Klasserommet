@@ -296,6 +296,7 @@ textarea.input { width: 100%; resize: vertical; }
 }
 
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.update-toast { background: var(--brand); cursor: pointer; }
 
 /* ---------- Verktøy-hub ---------- */
 

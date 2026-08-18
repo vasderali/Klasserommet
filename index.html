@@ -2,29 +2,118 @@
 <html lang="nb">
 <head>
 <meta charset="utf-8">
-<title>Klasserommet</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Klasserommet – verktøykassa for lærere</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Klassekart, gruppegenerator, navnetrekking, timer, timeplan og aktivitetsbank – uten innlogging, og uten at elevdata noen gang forlater enheten din. Gratis for lærere.">
+<link rel="canonical" href="https://klasserommet.vercel.app/">
+<meta property="og:title" content="Klasserommet – verktøykassa for lærere">
+<meta property="og:description" content="Klassekart, grupper, trekking, timer og timeplan. Ingen innlogging. Ingen elevdata i skyen.">
+<meta property="og:image" content="https://klasserommet.vercel.app/og.png">
+<meta property="og:url" content="https://klasserommet.vercel.app/">
+<meta property="og:type" content="website">
 <meta name="theme-color" content="#1e6b52">
-<meta name="description" content="Verktøykasse for lærere: klassekart med historikk, grupper, navnetrekking og timer. Alt lagres lokalt på enheten.">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Klasserommet">
-<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="/app/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48">
+<link rel="stylesheet" href="/landing.css">
+<script src="/landing.js" defer></script>
 </head>
 <body>
-<header class="app-header no-print">
-  <a class="brand" href="#/verktoy"><img class="brand-mark" src="icons/favicon.svg" alt="">Klasserommet</a>
-  <select id="classPicker" class="class-picker" aria-label="Velg klasse"></select>
+<header class="site-header">
+  <div class="wrap row-between">
+    <a class="logo" href="/"><img src="/app/icons/favicon.svg" alt="">Klasserommet</a>
+    <a class="btn primary" href="/app/">Åpne appen</a>
+  </div>
 </header>
-<main id="view"></main>
-<nav class="tabbar no-print">
-  <a href="#/verktoy" data-tab="verktoy"><span class="tab-ico">🧰</span>Verktøy</a>
-  <a href="#/klasser" data-tab="klasser"><span class="tab-ico">📋</span>Klasser</a>
-</nav>
-<script type="module" src="js/app.js"></script>
+
+<main>
+  <section class="hero wrap">
+    <h1>Verktøykassa for klasserommet.</h1>
+    <p class="lead">Klassekart, grupper, navnetrekking, timer, timeplan og aktivitetsbank –
+    samlet på ett sted, klart til bruk på under fem sekunder.</p>
+    <div class="cta-row">
+      <a class="btn primary big" href="/app/">Åpne Klasserommet – gratis</a>
+      <a class="btn big" href="#installer">Legg den på Hjem-skjermen</a>
+    </div>
+    <p class="fineprint">Ingen konto. Ingen installasjon fra App Store. Virker på iPad, PC og mobil.</p>
+  </section>
+
+  <section class="wrap usp-grid">
+    <div class="usp">
+      <span class="usp-ico">🔒</span>
+      <h2>Ingen elevdata i skyen</h2>
+      <p>Klasselister og kart lagres kun lokalt på din enhet. Ingenting sendes til noen server –
+      det finnes ingen server å sende til. Ingen sporing, ingen annonser, ingen analyseverktøy.</p>
+    </div>
+    <div class="usp">
+      <span class="usp-ico">⚡</span>
+      <h2>I gang på fem sekunder</h2>
+      <p>Ingen innlogging og ingen oppsett. Lim inn klasselista én gang, så er alle verktøyene klare –
+      også neste time, og timen etter der.</p>
+    </div>
+    <div class="usp">
+      <span class="usp-ico">✈️</span>
+      <h2>Virker uten nett</h2>
+      <p>Legg appen på Hjem-skjermen, så fungerer den offline i klasserommet – med eget ikon,
+      i fullskjerm, som en helt vanlig app.</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2 class="section-title">Verktøyene</h2>
+    <div class="tools-grid">
+      <a class="tool" href="/klassekart"><span>🪑</span><strong>Klassekart</strong>
+        <p>Magnetiske pulter, «ikke sammen»-regler, tilfeldig fylling som husker hvem som satt sammen sist – og utskrift til vikaren.</p></a>
+      <a class="tool" href="/gruppegenerator"><span>👥</span><strong>Gruppegenerator</strong>
+        <p>Tilfeldige grupper etter størrelse eller antall, som unngår de samme parene som forrige gang.</p></a>
+      <a class="tool" href="/navnetrekker"><span>🎲</span><strong>Navnetrekker</strong>
+        <p>Trekk elevnavn uten tilbakelegging – alle trekkes én gang før noen trekkes igjen. Fravær med ett trykk.</p></a>
+      <div class="tool"><span>⏱️</span><strong>Timer for tavla</strong>
+        <p>Stor nedtelling for projektoren med tavlemodus – og skjermen slukker ikke midt i nedtellingen.</p></div>
+      <div class="tool"><span>📅</span><strong>Timeplan</strong>
+        <p>Ukeplan med fargekodede fag, friminutt, rom og lærerinitialer – helt tilpassbar, med maler fra andre klasser.</p></div>
+      <div class="tool"><span>💡</span><strong>Aktivitetsbank</strong>
+        <p>Din egen samling av aktiviteter og opplegg, med filter på fag, område og sted.</p></div>
+    </div>
+  </section>
+
+  <section class="wrap install" id="installer">
+    <h2 class="section-title">Legg den på Hjem-skjermen</h2>
+    <div class="install-cols">
+      <div>
+        <h3>På iPad og iPhone</h3>
+        <ol>
+          <li>Åpne <a href="/app/">appen</a> i Safari</li>
+          <li>Trykk på Del-knappen <span class="key">⎋</span> i verktøylinjen</li>
+          <li>Velg <strong>«Legg til på Hjem-skjerm»</strong></li>
+        </ol>
+        <p class="muted">Da får du eget ikon, fullskjerm uten adresselinje – og dataene dine får varig lagring.</p>
+      </div>
+      <div>
+        <h3>På PC (Chrome/Edge)</h3>
+        <ol>
+          <li>Åpne <a href="/app/">appen</a> i nettleseren</li>
+          <li>Trykk på installer-ikonet i adressefeltet</li>
+          <li>Velg <strong>«Installer»</strong></li>
+        </ol>
+        <p class="muted">Appen åpnes i eget vindu og virker uten nett.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap privacy-note">
+    <h2 class="section-title">Personvern uten stjerner i margen</h2>
+    <p>Klasserommet er bygget etter ett prinsipp: <strong>elevdata skal aldri forlate enheten din.</strong>
+    Det er ikke et løfte i en personvernerklæring – det er slik appen er konstruert. Uten server,
+    konto eller informasjonskapsler er det heller ingenting å komme på avveie.</p>
+    <a class="btn" href="/personvern">Les personvernerklæringen</a>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap row-between">
+    <span>Laget av en lærer, for lærere.</span>
+    <nav><a href="/personvern">Personvern</a> · <a href="/app/">Åpne appen</a></nav>
+  </div>
+</footer>
 </body>
 </html>

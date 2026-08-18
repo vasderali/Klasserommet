@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Klasserommet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e6b52">
+<meta name="description" content="Verktøykasse for lærere: klassekart med historikk, grupper, navnetrekking og timer. Alt lagres lokalt på enheten.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Klasserommet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app-header no-print">
+  <a class="brand" href="#/verktoy"><img class="brand-mark" src="icons/favicon.svg" alt="">Klasserommet</a>
+  <select id="classPicker" class="class-picker" aria-label="Velg klasse"></select>
+</header>
+<main id="view"></main>
+<nav class="tabbar no-print">
+  <a href="#/verktoy" data-tab="verktoy"><span class="tab-ico">🧰</span>Verktøy</a>
+  <a href="#/klasser" data-tab="klasser"><span class="tab-ico">📋</span>Klasser</a>
+</nav>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

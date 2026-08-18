@@ -79,7 +79,23 @@ syncPicker();
 route();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Ny versjon lastet ned i bakgrunnen -> gi beskjed i stedet for å vente
+    // på neste innlasting i stillhet.
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          document.body.append(h('div', {
+            class: 'toast show update-toast',
+            role: 'status',
+            onclick: () => location.reload(),
+          }, '✨ Ny versjon er klar – trykk her for å oppdatere'));
+        }
+      });
+    });
+  }).catch(() => {});
 }
 
 // Be nettleseren om varig lagring – demper Safaris 7-dagers-sletting av
