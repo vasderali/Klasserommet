@@ -6,16 +6,18 @@ import * as grupper from './views/grupper.js';
 import * as trekker from './views/trekker.js';
 import * as timer from './views/timer.js';
 import * as timeplan from './views/timeplan.js';
+import * as aktiviteter from './views/aktiviteter.js';
 import * as klasser from './views/klasser.js';
 
-const views = { verktoy, kart, grupper, trekker, timer, timeplan, klasser };
-const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan']);
+const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, klasser };
+const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter']);
 const TOOL_TABS = [
   ['kart', '🪑 Kart'],
   ['grupper', '👥 Grupper'],
   ['trekker', '🎲 Trekker'],
   ['timer', '⏱️ Timer'],
   ['timeplan', '📅 Plan'],
+  ['aktiviteter', '💡 Bank'],
 ];
 
 const main = document.getElementById('view');
@@ -28,15 +30,30 @@ function toolNav(active) {
       h('a', { class: 'seg-btn' + (route === active ? ' active' : ''), href: '#/' + route }, label))));
 }
 
+let lastKey = null;
+
 function route() {
   const name = location.hash.replace(/^#\//, '') || 'verktoy';
   const key = views[name] ? name : 'verktoy';
-  const tab = TOOLS.has(key) ? 'verktoy' : key;
-  document.querySelectorAll('.tabbar a').forEach(a => a.classList.toggle('active', a.dataset.tab === tab));
-  document.body.dataset.view = key;
-  main.innerHTML = '';
-  if (TOOLS.has(key)) main.append(toolNav(key));
-  views[key].render(main);
+  const doRender = () => {
+    const tab = TOOLS.has(key) ? 'verktoy' : key;
+    document.querySelectorAll('.tabbar a').forEach(a => a.classList.toggle('active', a.dataset.tab === tab));
+    document.body.dataset.view = key;
+    main.innerHTML = '';
+    if (TOOLS.has(key)) main.append(toolNav(key));
+    views[key].render(main);
+  };
+  // Rendringen skjer alltid synkront (View Transitions viste seg å kunne
+  // utsette rendringen i skjulte faner). Myk innglidning i ren CSS i stedet,
+  // kun ved faktisk fanebytte – ikke ved re-render i samme visning.
+  const changed = key !== lastKey && lastKey !== null;
+  lastKey = key;
+  doRender();
+  if (changed) {
+    main.classList.remove('view-enter');
+    void main.offsetWidth; // restart animasjonen
+    main.classList.add('view-enter');
+  }
 }
 
 function syncPicker() {

@@ -1,35 +1,9 @@
 import { store } from '../store.js';
 import { h, toast, emptyState, segBtn, rerenderView as rr } from '../ui.js';
+import { STANDARD_FAG, fagColor } from '../fag.js';
 
 const DAYS = ['Man', 'Tir', 'Ons', 'Tor', 'Fre'];
 const DAYS_FULL = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'];
-const STANDARD_FAG = ['Matematikk', 'Norsk', 'Engelsk', 'Naturfag', 'Samfunnsfag',
-  'KRLE', 'Kroppsøving', 'Musikk', 'Kunst og håndverk', 'Mat og helse'];
-
-// Faste, gjenkjennelige farger for vanlige fag; ukjente fag får en stabil
-// farge utledet av navnet, så samme fag alltid har samme farge.
-const FAG_FARGER = {
-  'matematikk': '#cfe3f7',
-  'norsk': '#f7d8d2',
-  'engelsk': '#e7d9f5',
-  'naturfag': '#d5eed4',
-  'samfunnsfag': '#f5e9c6',
-  'krle': '#e9e1d1',
-  'kroppsøving': '#ffddba',
-  'gym': '#ffddba',
-  'musikk': '#f9d2e6',
-  'kunst og håndverk': '#d7f0ea',
-  'mat og helse': '#f1e5c0',
-  'uteskole': '#dcf0c9',
-};
-
-function fagColor(name) {
-  const key = name.trim().toLowerCase();
-  if (FAG_FARGER[key]) return FAG_FARGER[key];
-  let hash = 0;
-  for (const ch of key) hash = (hash * 31 + ch.charCodeAt(0)) % 360;
-  return `hsl(${hash} 45% 86%)`;
-}
 
 let selCell = null; // { row: rowId, day: 0-4 }
 let selRow = null;  // rowId (radredigering)

@@ -16,6 +16,8 @@ ingen innlogging, ingen server.
 - **Timer** – stor nedtelling for tavla/projektoren, med tavlemodus.
 - **Timeplan** – ukeplan med fargekodede fag, per klasse eller trinn.
   Lagres lokalt som alt annet; deles via eksport/import.
+- **Aktivitetsbank** – personlig samling av aktiviteter og opplegg med
+  tema, gjennomføring, sted og utstyr. Filtrer på fag, område og sted.
 - **Klasser** – lim inn klasselister (ett navn per linje), regler for hvem som
   ikke skal sammen, og eksport/import av sikkerhetskopi.
 

@@ -3,7 +3,7 @@ const KEY = 'klasserommet:v1';
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
 function blank() {
-  return { classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {}, timetables: {}, currentClassId: null };
+  return { classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {}, timetables: {}, activities: [], currentClassId: null };
 }
 
 let state = load();
@@ -99,6 +99,15 @@ export const store = {
 
   timetable(cid) { return state.timetables[cid] || null; },
   setTimetable(cid, tt) { state.timetables[cid] = tt; emit(); },
+
+  // Aktivitetsbanken er personlig, ikke knyttet til klasse.
+  activities() { return state.activities || (state.activities = []); },
+  addActivity(a) { this.activities().unshift({ id: uid(), ...a }); emit(); },
+  updateActivity(id, patch) {
+    const a = this.activities().find(x => x.id === id);
+    if (a) { Object.assign(a, patch); emit(); }
+  },
+  deleteActivity(id) { state.activities = this.activities().filter(a => a.id !== id); emit(); },
 
   exportJson() { return JSON.stringify(state, null, 2); },
   importJson(text) {

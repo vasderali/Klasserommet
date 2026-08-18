@@ -7,6 +7,7 @@ const TOOLS = [
   ['trekker', '🎲', 'Trekker', 'Trekk elevnavn – alle trekkes én gang før noen trekkes igjen.'],
   ['timer', '⏱️', 'Timer', 'Stor nedtelling for tavla og projektoren, med tavlemodus.'],
   ['timeplan', '📅', 'Timeplan', 'Ukeplan med fargekodede fag – for klassen eller hele trinnet.'],
+  ['aktiviteter', '💡', 'Aktivitetsbank', 'Dine aktiviteter og opplegg – filtrer på fag, område og sted.'],
 ];
 
 export function render(root) {
