@@ -24,7 +24,7 @@ function tickClock() {
 export function render(root) {
   if (!clockStarted) { setInterval(tickClock, 5000); clockStarted = true; }
   const cls = store.currentClass();
-  if (!cls) { root.append(emptyState('Lag en klasse først – tavlemodus viser dagens plan fra timeplanen.')); return; }
+  if (!cls) { root.append(emptyState('Lag en klasse først – tavlemodus viser dagens plan fra timeplanen.', '🖥')); return; }
   const tt = store.timetable(cls.id);
   const today = todayIdx();
   const day = selDay ?? today ?? 0;

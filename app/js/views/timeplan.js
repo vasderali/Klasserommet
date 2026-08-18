@@ -30,7 +30,7 @@ function ensure(cid) {
 export function render(root) {
   const cls = store.currentClass();
   if (!cls) {
-    root.append(emptyState('Lag en klasse (eller et trinn, f.eks. «2. trinn») først, så kan du fylle inn timeplanen.'));
+    root.append(emptyState('Lag en klasse (eller et trinn, f.eks. «2. trinn») først, så kan du fylle inn timeplanen.', '📅'));
     return;
   }
   const tt = ensure(cls.id);

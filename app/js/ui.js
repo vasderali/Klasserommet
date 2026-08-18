@@ -45,9 +45,9 @@ export function segBtn(label, active, onclick) {
   return h('button', { class: 'seg-btn' + (active ? ' active' : ''), onclick }, label);
 }
 
-export function emptyState(msg) {
+export function emptyState(msg, ico = '📋') {
   return h('div', { class: 'empty panel' },
-    h('div', { class: 'empty-icon', 'aria-hidden': 'true' }, '📋'),
+    h('div', { class: 'empty-icon', 'aria-hidden': 'true' }, ico),
     h('p', {}, msg),
     h('a', { class: 'btn primary', href: '#/klasser' }, 'Gå til Klasser'));
 }

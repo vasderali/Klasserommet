@@ -6,6 +6,7 @@ import { assignSeats } from '../engine.js';
 const W = 960, DW = 110, DH = 64;
 
 let tab = 'kart';
+let moreOpen = false;
 let selected = null;
 let snapshotView = null;
 let refit = null;
@@ -22,7 +23,7 @@ export function render(root) {
     resizeHooked = true;
   }
   const cls = store.currentClass();
-  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du bygge klassekart.')); return; }
+  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du bygge klassekart.', '🪑')); return; }
   const histCount = store.history(cls.id).length;
   const view = h('section', { class: 'view' },
     h('div', { class: 'view-head no-print' },
@@ -63,14 +64,16 @@ function buildEditor(cls) {
       h('button', { class: 'btn', 'aria-label': 'Flere pulter', onclick: () => { deskCounts[cls.id] = Math.min(40, countFor(cls) + 1); rr(); } }, '+')),
     h('button', { class: 'btn', onclick: () => addDesk(cls, chart) }, '+ Pult'),
     h('button', { class: 'btn primary', onclick: () => fill(cls, chart) }, '🎲 Fyll tilfeldig'),
-    h('button', { class: 'btn', onclick: () => {
-      if (!chart.desks.length) return;
-      chart.desks.forEach(d => { d.sid = null; });
-      store.setChart(cls.id, chart);
-      rr();
-    } }, 'Tøm navn'),
-    h('button', { class: 'btn', onclick: () => saveSnap(cls, chart) }, '💾 Lagre i historikk'),
-    h('button', { class: 'btn', onclick: () => { document.body.classList.add('print-mode'); window.print(); } }, '🖨 Skriv ut')));
+    h('button', { class: 'btn toolbar-more-btn', 'aria-label': 'Flere valg', onclick: () => { moreOpen = !moreOpen; rr(); } }, '⋯'),
+    h('div', { class: 'toolbar-sec' + (moreOpen ? ' open' : '') },
+      h('button', { class: 'btn', onclick: () => {
+        if (!chart.desks.length) return;
+        chart.desks.forEach(d => { d.sid = null; });
+        store.setChart(cls.id, chart);
+        rr();
+      } }, 'Tøm navn'),
+      h('button', { class: 'btn', onclick: () => saveSnap(cls, chart) }, '💾 Lagre i historikk'),
+      h('button', { class: 'btn', onclick: () => { document.body.classList.add('print-mode'); window.print(); } }, '🖨 Skriv ut'))));
 
   if (selected) {
     const d = chart.desks.find(x => x.id === selected);

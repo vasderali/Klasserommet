@@ -35,6 +35,36 @@
   --shadow-lift: 0 6px 20px rgba(30, 50, 40, .14);
 }
 
+:root { color-scheme: light; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #171d1a;
+    --panel: #212925;
+    --surface: #212925;
+    --surface-dim: #2b332e;
+    --ink: #e6ebe7;
+    --muted: #9fb0a6;
+    --line: #37413b;
+    --brand: #3d9b76;
+    --brand-strong: #2f8362;
+    --brand-tint: rgba(61, 155, 118, .15);
+    --warn-bg: #33301f;
+    --warn-line: #55492a;
+    --board-bg: #1d2420;
+    --dark-bg: #0d1411;
+    --header-bg: rgba(23, 29, 26, .92);
+    --tabbar-bg: rgba(30, 37, 33, .93);
+    --gridline: rgba(220, 240, 230, .04);
+    --shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .2);
+  }
+}
+
+@media (prefers-color-scheme: dark) and (hover: hover) {
+  .btn:hover { background: #2b332e; border-color: #4a554e; }
+}
+
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 svg.icon {
@@ -96,12 +126,18 @@ h2, h3, h4 { margin: 0 0 8px; }
 .brand-mark { width: 26px; height: 26px; border-radius: 7px; }
 
 .class-picker {
-  padding: 8px 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 30px 8px 12px;
   border: 1px solid var(--line);
   border-radius: 11px;
   font: inherit;
   font-weight: 600;
-  background: var(--surface);
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5l3.5 3.5 3.5-3.5' fill='none' stroke='%238a978f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
   color: var(--ink);
   max-width: 46vw;
 }
@@ -269,6 +305,15 @@ textarea.input { width: 100%; resize: vertical; }
   gap: 8px;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.toolbar-sec { display: contents; }
+.toolbar-more-btn { display: none; }
+
+@media (max-width: 640px) {
+  .toolbar-more-btn { display: inline-flex; }
+  .toolbar-sec { display: none; }
+  .toolbar-sec.open { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
 }
 
 .contextbar {
@@ -835,4 +880,25 @@ main.view-enter[data-dir="b"] > * { animation-name: viewInB; }
   }
   body.print-mode .board { transform: scale(.73) !important; background: none; }
   body.print-mode .desk { box-shadow: none; }
+}
+
+/* ---------- Mørk modus: komponent-overstyringer (må stå sist for å vinne
+   kaskaden mot komponentreglene over) ---------- */
+
+@media (prefers-color-scheme: dark) {
+  .desk { background: #2a332d; border-color: #414c45; }
+  .desk.free { background: rgba(255, 255, 255, .04); }
+  .seg-btn.active { background: #3a453f; color: var(--ink); }
+  .toast { color: #14231d; }
+  .update-toast { color: #fff; }
+  .tt-cell.empty { background: rgba(255, 255, 255, .04); }
+  .tavle-item.empty { background: transparent; }
+  /* Fargede fagceller beholder lyse pastellfarger – da må teksten være mørk. */
+  .tt-cell[style*="background"], .tavle-item[style*="background"] { color: #22302a; }
+  .tt-cell[style*="background"] .tt-rom { color: #4a5a52; }
+  .tavle-item[style*="background"] .tavle-detalj,
+  .tavle-item[style*="background"] .tavle-label { color: #4a5a52; }
+  .chip[style*="background"] { color: #22302a; }
+  .tt-pause, .tavle-pause { background: repeating-linear-gradient(-45deg, #2b332e, #2b332e 8px, #313a34 8px, #313a34 16px); }
+  .tavle-check { border-color: #414c45; }
 }

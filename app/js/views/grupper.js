@@ -12,7 +12,7 @@ const excluded = {}; // cid -> Set av elever som holdes utenfor (fravær o.l.)
 
 export function render(root) {
   const cls = store.currentClass();
-  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du lage grupper.')); return; }
+  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du lage grupper.', '👥')); return; }
   if (resultCid !== cls.id) result = null;
   const ex = excluded[cls.id] || (excluded[cls.id] = new Set());
   const nameOf = id => cls.students.find(s => s.id === id)?.name;

@@ -1,5 +1,9 @@
 import { store } from '../store.js';
-import { h, icon } from '../ui.js';
+import { h, icon, toast, rerenderView as rr } from '../ui.js';
+
+const DEMO_NAVN = ['Emma', 'Noah', 'Olivia', 'Liam', 'Ella', 'Oskar', 'Maja', 'Aksel',
+  'Sofie', 'Theo', 'Ingrid', 'Jakob', 'Nora', 'Elias', 'Selma', 'Henrik',
+  'Ada', 'Magnus', 'Live', 'Sander', 'Tuva', 'Mathias', 'Frida', 'Johannes'];
 
 const TOOLS = [
   ['kart', 'Klassekart', 'Plasser pulter, fyll tilfeldig med regler, historikk og utskrift.'],
@@ -19,7 +23,14 @@ export function render(root) {
       h('h2', {}, 'Verktøy'),
       cls && h('span', { class: 'muted' }, cls.name)),
     !cls && h('div', { class: 'panel' },
-      h('p', {}, '👋 Velkommen! Legg inn en klasse under Klasser, så er alle verktøyene klare til bruk.')),
+      h('p', {}, '👋 Velkommen! Legg inn en klasse under Klasser, så er alle verktøyene klare til bruk – eller ta en titt med en eksempelklasse først.'),
+      h('div', { class: 'row wrap' },
+        h('a', { class: 'btn primary', href: '#/klasser' }, 'Legg inn klassen min'),
+        h('button', { class: 'btn', onclick: () => {
+          store.addClass('7A (eksempel)', DEMO_NAVN);
+          toast('Eksempelklasse med 24 fiktive navn er klar – slett den under Klasser når du vil.');
+          rr();
+        } }, '✨ Prøv med eksempelklasse'))),
     h('div', { class: 'tool-grid' }, TOOLS.map(([route, title, desc]) =>
       h('a', { class: 'tool-card panel', href: '#/' + route },
         h('span', { class: 'tool-ico' }, icon(route)),

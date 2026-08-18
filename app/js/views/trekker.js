@@ -6,7 +6,7 @@ let justDrawn = false;
 
 export function render(root) {
   const cls = store.currentClass();
-  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du trekke navn.')); return; }
+  if (!cls) { root.append(emptyState('Lag en klasse først, så kan du trekke navn.', '🎲')); return; }
   const p = store.picker(cls.id);
   const valid = new Set(cls.students.map(s => s.id));
   p.drawn = p.drawn.filter(id => valid.has(id));
