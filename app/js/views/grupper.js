@@ -44,9 +44,9 @@ export function render(root) {
         segBtn('Gruppestørrelse', mode === 'size', () => { mode = 'size'; rr(); }),
         segBtn('Antall grupper', mode === 'count', () => { mode = 'count'; rr(); })),
       h('div', { class: 'stepper' },
-        h('button', { class: 'btn', onclick: () => bump(-1) }, '−'),
+        h('button', { class: 'btn', 'aria-label': 'Mindre verdi', onclick: () => bump(-1) }, '−'),
         h('span', { class: 'stepper-val' }, String(mode === 'size' ? sizeVal : countVal)),
-        h('button', { class: 'btn', onclick: () => bump(1) }, '+')),
+        h('button', { class: 'btn', 'aria-label': 'Større verdi', onclick: () => bump(1) }, '+')),
       h('button', { class: 'btn primary', onclick: generate }, '🎲 Lag grupper')),
     h('p', { class: 'muted' }, 'Trykk på et navn for å holde noen utenfor (f.eks. fravær). Trekningen følger «ikke sammen»-reglene og unngår par fra de siste rundene.'),
     h('div', { class: 'chips' }, cls.students.map(s =>

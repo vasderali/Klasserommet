@@ -64,7 +64,7 @@ export function render(root) {
       h('div', { class: 'row wrap' },
         h('button', { class: 'btn', onclick: () => addRow('time') }, '+ Time'),
         h('button', { class: 'btn', onclick: () => addRow('pause') }, '+ Friminutt'),
-        others.length ? h('select', { class: 'input', onchange: e => {
+        others.length ? h('select', { class: 'input', 'aria-label': 'Kopier timeplan fra en annen klasse', onchange: e => {
           if (e.target.value) copyFrom(cls, tt, e.target.value);
         } },
           h('option', { value: '' }, 'Kopier fra …'),

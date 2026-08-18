@@ -34,8 +34,8 @@ export function fmtDate(ts) {
 }
 
 export function toast(msg) {
-  document.querySelectorAll('.toast').forEach(t => t.remove());
-  const t = h('div', { class: 'toast' }, msg);
+  document.querySelectorAll('.toast:not(.update-toast)').forEach(t => t.remove());
+  const t = h('div', { class: 'toast', role: 'status', 'aria-live': 'polite' }, msg);
   document.body.append(t);
   requestAnimationFrame(() => t.classList.add('show'));
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600);
@@ -47,7 +47,7 @@ export function segBtn(label, active, onclick) {
 
 export function emptyState(msg) {
   return h('div', { class: 'empty panel' },
-    h('div', { class: 'empty-icon' }, '📋'),
+    h('div', { class: 'empty-icon', 'aria-hidden': 'true' }, '📋'),
     h('p', {}, msg),
     h('a', { class: 'btn primary', href: '#/klasser' }, 'Gå til Klasser'));
 }

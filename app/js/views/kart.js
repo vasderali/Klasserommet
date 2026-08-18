@@ -47,7 +47,7 @@ function buildEditor(cls) {
   if (selected && !chart.desks.some(d => d.id === selected)) selected = null;
   const box = h('div', {});
 
-  const presetSel = h('select', { class: 'input no-print', onchange: e => applyPreset(cls, chart, e.target.value) },
+  const presetSel = h('select', { class: 'input no-print', 'aria-label': 'Velg pultoppsett', onchange: e => applyPreset(cls, chart, e.target.value) },
     h('option', { value: '' }, 'Nytt oppsett …'),
     h('option', { value: 'rows2' }, 'Rekker · topulter'),
     h('option', { value: 'rows1' }, 'Rekker · enkeltpulter'),
@@ -58,9 +58,9 @@ function buildEditor(cls) {
     presetSel,
     h('div', { class: 'stepper' },
       h('span', { class: 'muted small' }, 'Pulter'),
-      h('button', { class: 'btn', onclick: () => { deskCounts[cls.id] = Math.max(1, countFor(cls) - 1); rr(); } }, '−'),
+      h('button', { class: 'btn', 'aria-label': 'Færre pulter', onclick: () => { deskCounts[cls.id] = Math.max(1, countFor(cls) - 1); rr(); } }, '−'),
       h('span', { class: 'stepper-val' }, String(countFor(cls))),
-      h('button', { class: 'btn', onclick: () => { deskCounts[cls.id] = Math.min(40, countFor(cls) + 1); rr(); } }, '+')),
+      h('button', { class: 'btn', 'aria-label': 'Flere pulter', onclick: () => { deskCounts[cls.id] = Math.min(40, countFor(cls) + 1); rr(); } }, '+')),
     h('button', { class: 'btn', onclick: () => addDesk(cls, chart) }, '+ Pult'),
     h('button', { class: 'btn primary', onclick: () => fill(cls, chart) }, '🎲 Fyll tilfeldig'),
     h('button', { class: 'btn', onclick: () => {
@@ -273,6 +273,9 @@ function renderBoard(desks, cls, chart) {
       class: 'desk' + (name ? '' : ' free') + (interactive && selected === d.id ? ' sel' : ''),
       'data-id': d.id,
       style: `left:${d.x}px;top:${d.y}px`,
+      tabindex: interactive ? '0' : null,
+      role: interactive ? 'button' : null,
+      'aria-label': interactive ? (name ? `Pult: ${name}` : 'Ledig pult') : null,
     }, h('span', { class: 'desk-name' }, name || 'Ledig')));
   }
   wrap.append(board);
@@ -323,6 +326,53 @@ function magnet(id, desks, x, y) {
 
 function attachPointer(board, desks, cls, chart) {
   let drag = null;
+
+  // Delt trykk-logikk for peker og tastatur: velg, avvelg eller bytt plass.
+  const tapDesk = d => {
+    if (selected === null) {
+      selected = d.id;
+    } else if (selected === d.id) {
+      selected = null;
+    } else {
+      const o = desks.find(x => x.id === selected);
+      if (o) { const t = d.sid; d.sid = o.sid; o.sid = t; }
+      selected = null;
+      store.setChart(cls.id, chart);
+    }
+    rr();
+    requestAnimationFrame(() => {
+      document.querySelector(`.desk[data-id="${d.id}"]`)?.focus?.();
+    });
+  };
+
+  // Tastatur: piltaster flytter pulten, Enter/mellomrom velger/bytter.
+  board.addEventListener('keydown', e => {
+    const el = e.target.closest?.('.desk');
+    if (!el) return;
+    const d = desks.find(x => x.id === el.dataset.id);
+    if (!d) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      tapDesk(d);
+      return;
+    }
+    const step = 8;
+    let dx = 0, dy = 0;
+    if (e.key === 'ArrowLeft') dx = -step;
+    else if (e.key === 'ArrowRight') dx = step;
+    else if (e.key === 'ArrowUp') dy = -step;
+    else if (e.key === 'ArrowDown') dy = step;
+    else return;
+    e.preventDefault();
+    const nx = Math.min(Math.max(d.x + dx, 0), W - DW);
+    const ny = Math.max(d.y + dy, 8);
+    if (overlapsAny(d.id, desks, nx, ny)) return;
+    d.x = nx;
+    d.y = ny;
+    el.style.left = d.x + 'px';
+    el.style.top = d.y + 'px';
+    store.setChart(cls.id, chart);
+  });
   board.addEventListener('pointerdown', e => {
     const el = e.target.closest('.desk');
     if (!el) { if (selected) { selected = null; rr(); } return; }
@@ -366,16 +416,8 @@ function attachPointer(board, desks, cls, chart) {
       else { d.x = ox; d.y = oy; }
       store.setChart(cls.id, chart);
       rr();
-    } else if (selected === null) {
-      selected = d.id; rr();
-    } else if (selected === d.id) {
-      selected = null; rr();
     } else {
-      const o = desks.find(x => x.id === selected);
-      if (o) { const t = d.sid; d.sid = o.sid; o.sid = t; }
-      selected = null;
-      store.setChart(cls.id, chart);
-      rr();
+      tapDesk(d);
     }
   };
   board.addEventListener('pointerup', up);

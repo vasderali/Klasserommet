@@ -26,8 +26,8 @@ function parseNames(text) {
 }
 
 function addForm(first) {
-  const nameIn = h('input', { class: 'input', placeholder: 'Navn på klassen, f.eks. 9B' });
-  const ta = h('textarea', { class: 'input', rows: 8, placeholder: 'Ett navn per linje – lim gjerne inn hele klasselista fra Excel eller itslearning.' });
+  const nameIn = h('input', { class: 'input', 'aria-label': 'Navn på klassen', placeholder: 'Navn på klassen, f.eks. 9B' });
+  const ta = h('textarea', { class: 'input', rows: 8, 'aria-label': 'Elevnavn, ett per linje', placeholder: 'Ett navn per linje – lim gjerne inn hele klasselista fra Excel eller itslearning.' });
   return h('div', { class: 'panel form-col' },
     first && h('p', {}, '👋 Velkommen! Legg inn den første klassen din, så er alle verktøyene klare til bruk.'),
     nameIn, ta,
@@ -60,8 +60,8 @@ function editCard(c) {
   const nameIn = h('input', { class: 'input', value: c.name,
     onchange: e => store.renameClass(c.id, e.target.value.trim() || c.name) });
   const addIn = h('textarea', { class: 'input', rows: 2, placeholder: 'Legg til elever – ett navn per linje' });
-  const selA = h('select', { class: 'input' }, c.students.map(s => h('option', { value: s.id }, s.name)));
-  const selB = h('select', { class: 'input' }, c.students.map(s => h('option', { value: s.id }, s.name)));
+  const selA = h('select', { class: 'input', 'aria-label': 'Første elev i regelen' }, c.students.map(s => h('option', { value: s.id }, s.name)));
+  const selB = h('select', { class: 'input', 'aria-label': 'Andre elev i regelen' }, c.students.map(s => h('option', { value: s.id }, s.name)));
   const nameOf = id => c.students.find(s => s.id === id)?.name || '?';
   return h('div', { class: 'panel form-col' },
     h('div', { class: 'row spread' },
@@ -95,7 +95,7 @@ function editCard(c) {
     (c.apart || []).length ? h('div', { class: 'rules' }, c.apart.map(([a, b], i) =>
       h('div', { class: 'rule row spread' },
         h('span', {}, `${nameOf(a)} ↔ ${nameOf(b)}`),
-        h('button', { class: 'btn small', onclick: () => { store.removeRule(c.id, i); rr(); } }, '✕')))) : null);
+        h('button', { class: 'btn small', 'aria-label': `Fjern regelen ${nameOf(a)} og ${nameOf(b)}`, onclick: () => { store.removeRule(c.id, i); rr(); } }, '✕')))) : null);
 }
 
 function dataPanel() {

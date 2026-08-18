@@ -15,7 +15,7 @@ export function render(root) {
   const remaining = cls.students.filter(s => !p.drawn.includes(s.id) && !p.absent.includes(s.id));
   const last = p.drawn[p.drawn.length - 1];
 
-  const display = h('div', { class: 'draw-display' + (justDrawn ? ' pop' : '') },
+  const display = h('div', { class: 'draw-display' + (justDrawn ? ' pop' : ''), 'aria-live': 'polite' },
     remaining.length === 0 && p.drawn.length ? 'Alle er trukket! 🎉' : (last ? nameOf(last) : 'Klar?'));
   justDrawn = false;
 
@@ -59,6 +59,14 @@ function draw(p, remaining, display) {
   if (spinning || !remaining.length) return;
   spinning = true;
   const winner = remaining[Math.floor(Math.random() * remaining.length)];
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    display.textContent = winner.name;
+    p.drawn.push(winner.id);
+    store.savePicker();
+    spinning = false;
+    rr();
+    return;
+  }
   let i = 0;
   const iv = setInterval(() => {
     display.textContent = remaining[Math.floor(Math.random() * remaining.length)].name;

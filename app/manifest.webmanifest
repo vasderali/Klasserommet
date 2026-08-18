@@ -6,6 +6,7 @@
   "start_url": "/app/",
   "scope": "/app/",
   "display": "standalone",
+  "categories": ["education", "productivity"],
   "background_color": "#f4f2ec",
   "theme_color": "#1e6b52",
   "lang": "nb",

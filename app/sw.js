@@ -1,6 +1,6 @@
 // Cache-først med oppdatering i bakgrunnen: appen virker uten nett i
 // klasserommet, og nye versjoner hentes stille neste gang det er nett.
-const VERSION = 'klasserommet-v7';
+const VERSION = 'klasserommet-v8';
 
 const ASSETS = [
   '.',
