@@ -336,7 +336,10 @@ function attachPointer(board, desks, cls, chart) {
     if (!drag) return;
     const s = board._scale || 1;
     const dx = (e.clientX - drag.sx) / s, dy = (e.clientY - drag.sy) / s;
-    if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 7) drag.moved = true;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 7) {
+      drag.moved = true;
+      drag.el.classList.add('dragging');
+    }
     if (drag.moved) {
       const rawX = Math.min(Math.max(Math.round(drag.ox + dx), 0), W - DW);
       const rawY = Math.max(Math.round(drag.oy + dy), 8);

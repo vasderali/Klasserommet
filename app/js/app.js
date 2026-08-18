@@ -1,5 +1,5 @@
 import { store, onChange } from './store.js';
-import { h } from './ui.js';
+import { h, icon } from './ui.js';
 import * as verktoy from './views/verktoy.js';
 import * as kart from './views/kart.js';
 import * as grupper from './views/grupper.js';
@@ -12,12 +12,12 @@ import * as klasser from './views/klasser.js';
 const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, klasser };
 const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter']);
 const TOOL_TABS = [
-  ['kart', '🪑 Kart'],
-  ['grupper', '👥 Grupper'],
-  ['trekker', '🎲 Trekker'],
-  ['timer', '⏱️ Timer'],
-  ['timeplan', '📅 Plan'],
-  ['aktiviteter', '💡 Bank'],
+  ['kart', 'Kart'],
+  ['grupper', 'Grupper'],
+  ['trekker', 'Trekker'],
+  ['timer', 'Timer'],
+  ['timeplan', 'Plan'],
+  ['aktiviteter', 'Bank'],
 ];
 
 const main = document.getElementById('view');
@@ -27,10 +27,12 @@ function toolNav(active) {
   return h('div', { class: 'toolnav no-print' },
     h('a', { class: 'btn small', href: '#/verktoy' }, '‹ Verktøy'),
     h('div', { class: 'seg' }, TOOL_TABS.map(([route, label]) =>
-      h('a', { class: 'seg-btn' + (route === active ? ' active' : ''), href: '#/' + route }, label))));
+      h('a', { class: 'seg-btn' + (route === active ? ' active' : ''), href: '#/' + route },
+        icon(route), label))));
 }
 
 let lastKey = null;
+const NAV_ORDER = ['verktoy', 'kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter', 'klasser'];
 
 function route() {
   const name = location.hash.replace(/^#\//, '') || 'verktoy';
@@ -47,9 +49,11 @@ function route() {
   // utsette rendringen i skjulte faner). Myk innglidning i ren CSS i stedet,
   // kun ved faktisk fanebytte – ikke ved re-render i samme visning.
   const changed = key !== lastKey && lastKey !== null;
+  const dir = NAV_ORDER.indexOf(key) >= NAV_ORDER.indexOf(lastKey) ? 'f' : 'b';
   lastKey = key;
   doRender();
   if (changed) {
+    main.dataset.dir = dir;
     main.classList.remove('view-enter');
     void main.offsetWidth; // restart animasjonen
     main.classList.add('view-enter');

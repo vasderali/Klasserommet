@@ -2,6 +2,7 @@ import { store } from '../store.js';
 import { h, emptyState, rerenderView as rr } from '../ui.js';
 
 let spinning = false;
+let justDrawn = false;
 
 export function render(root) {
   const cls = store.currentClass();
@@ -14,8 +15,9 @@ export function render(root) {
   const remaining = cls.students.filter(s => !p.drawn.includes(s.id) && !p.absent.includes(s.id));
   const last = p.drawn[p.drawn.length - 1];
 
-  const display = h('div', { class: 'draw-display' },
+  const display = h('div', { class: 'draw-display' + (justDrawn ? ' pop' : '') },
     remaining.length === 0 && p.drawn.length ? 'Alle er trukket! 🎉' : (last ? nameOf(last) : 'Klar?'));
+  justDrawn = false;
 
   root.append(h('section', { class: 'view' },
     h('div', { class: 'view-head' }, h('h2', {}, 'Trekk et navn')),
@@ -66,6 +68,7 @@ function draw(p, remaining, display) {
       p.drawn.push(winner.id);
       store.savePicker();
       spinning = false;
+      justDrawn = true;
       rr();
     }
   }, 60);

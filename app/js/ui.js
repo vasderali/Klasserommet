@@ -15,6 +15,18 @@ export function h(tag, attrs = {}, ...kids) {
 
 export const clone = x => JSON.parse(JSON.stringify(x));
 
+// Ikon fra spriten i index.html, f.eks. icon('kart').
+export function icon(name, cls = 'icon') {
+  const NS = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(NS, 'svg');
+  s.setAttribute('class', cls);
+  s.setAttribute('aria-hidden', 'true');
+  const u = document.createElementNS(NS, 'use');
+  u.setAttribute('href', '#i-' + name);
+  s.append(u);
+  return s;
+}
+
 export function fmtDate(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString('nb-NO', { weekday: 'short', day: 'numeric', month: 'short' }) +

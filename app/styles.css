@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 /* touch-action: manipulation fjerner dobbelttrykk-zoom, men beholder
    pinch-zoom. Pultene overstyrer med touch-action: none for draging. */
 * { box-sizing: border-box; touch-action: manipulation; }
@@ -5,15 +12,40 @@
 :root {
   --bg: #f4f2ec;
   --panel: #ffffff;
+  --surface: #ffffff;
+  --surface-dim: #eae7de;
   --ink: #22302a;
-  --muted: #6b7a72;
+  --muted: #5c6b63;
   --line: #e3dfd4;
   --brand: #1e6b52;
+  --brand-strong: #17553f;
+  --brand-tint: rgba(30, 107, 82, .1);
   --accent: #e8a13a;
   --danger: #c0442c;
+  --warn-bg: #fff7e8;
+  --warn-line: #ecd9b0;
+  --board-bg: #edf0e8;
+  --board-front: #2e5c49;
+  --dark-bg: #14231d;
+  --header-bg: rgba(244, 242, 236, .92);
+  --tabbar-bg: rgba(255, 255, 255, .93);
   --gridline: rgba(30, 60, 45, .05);
   --radius: 14px;
   --shadow: 0 1px 3px rgba(30, 50, 40, .08), 0 4px 16px rgba(30, 50, 40, .06);
+  --shadow-lift: 0 6px 20px rgba(30, 50, 40, .14);
+}
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+svg.icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
 }
 
 html, body {
@@ -24,7 +56,7 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -44,7 +76,7 @@ h2, h3, h4 { margin: 0 0 8px; }
   justify-content: space-between;
   gap: 12px;
   padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
-  background: rgba(246, 244, 238, .92);
+  background: var(--header-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
@@ -69,7 +101,7 @@ h2, h3, h4 { margin: 0 0 8px; }
   border-radius: 11px;
   font: inherit;
   font-weight: 600;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   max-width: 46vw;
 }
@@ -86,7 +118,7 @@ main {
   right: 0;
   bottom: 0;
   display: flex;
-  background: rgba(255, 255, 255, .93);
+  background: var(--tabbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
@@ -108,7 +140,7 @@ main {
   border-radius: 10px;
 }
 
-.tab-ico { font-size: 22px; line-height: 1.2; }
+.tab-ico { width: 23px; height: 23px; }
 .tabbar a.active { color: var(--brand); background: rgba(30, 107, 82, .08); }
 
 /* ---------- Byggeklosser ---------- */
@@ -122,7 +154,12 @@ main {
   flex-wrap: wrap;
 }
 
-.view-head h2 { margin: 0; font-size: 24px; }
+.view-head h2 {
+  margin: 0;
+  font-size: clamp(23px, 3vw, 27px);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+}
 
 .panel {
   background: var(--panel);
@@ -141,7 +178,7 @@ main {
   padding: 9px 16px;
   border-radius: 11px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font-size: 14.5px;
   font-weight: 600;
@@ -163,7 +200,7 @@ a.btn { text-decoration: none; }
   border: 1px solid var(--line);
   border-radius: 11px;
   font: inherit;
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   min-width: 0;
 }
@@ -172,13 +209,17 @@ textarea.input { width: 100%; resize: vertical; }
 
 .seg {
   display: inline-flex;
-  background: #eae7de;
+  background: var(--surface-dim);
   border-radius: 12px;
   padding: 3px;
   gap: 2px;
+  flex-wrap: wrap;
 }
 
 .seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: none;
   background: transparent;
   padding: 8px 14px;
@@ -187,7 +228,10 @@ textarea.input { width: 100%; resize: vertical; }
   font-size: 14px;
   color: var(--muted);
   cursor: pointer;
+  text-decoration: none;
 }
+
+.seg-btn .icon { width: 16px; height: 16px; }
 
 .seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
 
@@ -203,7 +247,7 @@ textarea.input { width: 100%; resize: vertical; }
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font-size: 14px;
   font-weight: 500;
@@ -232,8 +276,8 @@ textarea.input { width: 100%; resize: vertical; }
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
-  background: #fff7e8;
-  border: 1px solid #ecd9b0;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
   border-radius: 12px;
   padding: 8px 12px;
   margin-bottom: 10px;
@@ -260,7 +304,7 @@ textarea.input { width: 100%; resize: vertical; }
   align-items: center;
   width: 100%;
   padding: 13px 15px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 12px;
   margin-bottom: 8px;
@@ -317,7 +361,20 @@ textarea.input { width: 100%; resize: vertical; }
 }
 
 .tool-card:active { transform: scale(.98); }
-.tool-ico { font-size: 34px; line-height: 1; }
+
+.tool-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: var(--brand-tint);
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+.tool-ico .icon { width: 26px; height: 26px; }
 .tool-info { display: flex; flex-direction: column; gap: 2px; }
 
 .toolnav {
@@ -337,7 +394,7 @@ textarea.input { width: 100%; resize: vertical; }
   overflow: hidden;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: #edf0e8;
+  background: var(--board-bg);
 }
 
 .board {
@@ -354,7 +411,7 @@ textarea.input { width: 100%; resize: vertical; }
   left: 25%;
   width: 50%;
   height: 30px;
-  background: #2e5c49;
+  background: var(--board-front);
   color: #dfe9e2;
   border-radius: 8px;
   display: flex;
@@ -370,7 +427,7 @@ textarea.input { width: 100%; resize: vertical; }
   position: absolute;
   width: 110px;
   height: 64px;
-  background: #fff;
+  background: var(--surface);
   border: 1.5px solid #c9d3cb;
   border-radius: 10px;
   display: flex;
@@ -447,7 +504,11 @@ textarea.input { width: 100%; resize: vertical; }
   color: var(--ink);
 }
 
-.timer-digits.urgent { color: var(--danger); }
+.timer-digits.urgent { color: var(--danger); animation: urgentPulse 1s ease-in-out infinite; }
+
+@keyframes urgentPulse {
+  50% { transform: scale(1.015); }
+}
 .timer-digits.done { animation: blink 1s steps(2, start) infinite; color: var(--danger); }
 
 @keyframes blink { to { visibility: hidden; } }
@@ -459,7 +520,7 @@ textarea.input { width: 100%; resize: vertical; }
   margin: 0;
   padding: 0;
   justify-content: center;
-  background: #14231d;
+  background: var(--dark-bg);
 }
 
 .timer-view.full .timer-digits { color: #f2f6f1; font-size: clamp(120px, 26vw, 400px); }
@@ -538,7 +599,7 @@ textarea.input { width: 100%; resize: vertical; }
   min-height: 56px;
   border-radius: 10px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -565,17 +626,53 @@ textarea.input { width: 100%; resize: vertical; }
 
 /* ---------- Faneoverganger ---------- */
 
-main.view-enter > * {
-  animation: viewIn .2s ease both;
+main.view-enter > * { animation: viewInF .2s ease both; }
+main.view-enter[data-dir="b"] > * { animation-name: viewInB; }
+
+@keyframes viewInF {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: none; }
 }
 
-@keyframes viewIn {
-  from { opacity: 0; transform: translateY(7px); }
+@keyframes viewInB {
+  from { opacity: 0; transform: translateX(-14px); }
   to { opacity: 1; transform: none; }
+}
+
+/* ---------- Hover (PC) og mikrointeraksjoner ---------- */
+
+.tool-card, .chip, .hist-item { transition: transform .18s, box-shadow .18s, border-color .15s, background .15s; }
+
+@media (hover: hover) {
+  .btn:hover { border-color: #cfcabd; background: #fbfaf6; }
+  .btn.primary:hover { background: var(--brand-strong); }
+  .btn.danger:hover { background: rgba(192, 68, 44, .06); }
+  .tool-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  .chip:hover:not(.static) { border-color: var(--brand); }
+  .hist-item:hover { border-color: var(--brand); }
+  .tabbar a:hover { color: var(--brand); }
+  .seg-btn:hover { color: var(--ink); }
+}
+
+.desk.dragging {
+  box-shadow: 0 8px 22px rgba(20, 40, 30, .22);
+  z-index: 5;
+  cursor: grabbing;
+}
+
+.draw-display.pop { animation: drawPop .25s ease; }
+
+@keyframes drawPop {
+  from { transform: scale(.92); }
+  to { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   main.view-enter > * { animation: none; }
+  .draw-display.pop { animation: none; }
+  .timer-digits.urgent { animation: none; }
+  .timer-digits.done { animation: none; visibility: visible; }
+  .tool-card, .btn { transition: none; }
 }
 
 /* ---------- Utskrift ---------- */
@@ -599,7 +696,7 @@ main.view-enter > * {
     height: auto !important;
     overflow: visible;
     border: none;
-    background: #fff;
+    background: var(--surface);
   }
   body.print-mode .board { transform: scale(.73) !important; background: none; }
   body.print-mode .desk { box-shadow: none; }
