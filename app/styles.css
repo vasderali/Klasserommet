@@ -37,34 +37,6 @@
 
 :root { color-scheme: light; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #171d1a;
-    --panel: #212925;
-    --surface: #212925;
-    --surface-dim: #2b332e;
-    --ink: #e6ebe7;
-    --muted: #9fb0a6;
-    --line: #37413b;
-    --brand: #3d9b76;
-    --brand-strong: #2f8362;
-    --brand-tint: rgba(61, 155, 118, .15);
-    --warn-bg: #33301f;
-    --warn-line: #55492a;
-    --board-bg: #1d2420;
-    --dark-bg: #0d1411;
-    --header-bg: rgba(23, 29, 26, .92);
-    --tabbar-bg: rgba(30, 37, 33, .93);
-    --gridline: rgba(220, 240, 230, .04);
-    --shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .2);
-  }
-}
-
-@media (prefers-color-scheme: dark) and (hover: hover) {
-  .btn:hover { background: #2b332e; border-color: #4a554e; }
-}
-
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 svg.icon {
@@ -882,23 +854,3 @@ main.view-enter[data-dir="b"] > * { animation-name: viewInB; }
   body.print-mode .desk { box-shadow: none; }
 }
 
-/* ---------- Mørk modus: komponent-overstyringer (må stå sist for å vinne
-   kaskaden mot komponentreglene over) ---------- */
-
-@media (prefers-color-scheme: dark) {
-  .desk { background: #2a332d; border-color: #414c45; }
-  .desk.free { background: rgba(255, 255, 255, .04); }
-  .seg-btn.active { background: #3a453f; color: var(--ink); }
-  .toast { color: #14231d; }
-  .update-toast { color: #fff; }
-  .tt-cell.empty { background: rgba(255, 255, 255, .04); }
-  .tavle-item.empty { background: transparent; }
-  /* Fargede fagceller beholder lyse pastellfarger – da må teksten være mørk. */
-  .tt-cell[style*="background"], .tavle-item[style*="background"] { color: #22302a; }
-  .tt-cell[style*="background"] .tt-rom { color: #4a5a52; }
-  .tavle-item[style*="background"] .tavle-detalj,
-  .tavle-item[style*="background"] .tavle-label { color: #4a5a52; }
-  .chip[style*="background"] { color: #22302a; }
-  .tt-pause, .tavle-pause { background: repeating-linear-gradient(-45deg, #2b332e, #2b332e 8px, #313a34 8px, #313a34 16px); }
-  .tavle-check { border-color: #414c45; }
-}
