@@ -8,6 +8,13 @@ const DAYS_FULL = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'];
 let selCell = null; // { row: rowId, day: 0-4 }
 let selRow = null;  // rowId (radredigering)
 
+// Tekstfelt lagrer fortløpende UTEN re-render – en full re-render på blur
+// river bort elementet brukeren er i ferd med å trykke på.
+function debounced(fn) {
+  let t;
+  return e => { clearTimeout(t); t = setTimeout(() => fn(e), 250); };
+}
+
 function ensure(cid) {
   let tt = store.timetable(cid);
   if (!tt) {
@@ -29,6 +36,13 @@ export function render(root) {
   const tt = ensure(cls.id);
   if (selCell && !tt.rows.some(r => r.id === selCell.row)) selCell = null;
   if (selRow && !tt.rows.some(r => r.id === selRow)) selRow = null;
+
+  // Rydd bort tomme celler – bortsett fra den som ev. redigeres nå.
+  Object.keys(tt.cells).forEach(k => {
+    const c = tt.cells[k];
+    const inEdit = selCell && k === selCell.row + ':' + selCell.day;
+    if (c && !c.fag && !c.rom && !c.info && !inEdit) delete tt.cells[k];
+  });
 
   const usedFag = [...new Set(Object.values(tt.cells).map(c => c.fag).filter(Boolean))];
   const fagListe = [...new Set([...usedFag, ...STANDARD_FAG])];
@@ -148,7 +162,10 @@ function rowEditor(cls, tt) {
   return h('div', { class: 'contextbar no-print' },
     h('input', { class: 'input', value: row.label,
       placeholder: 'F.eks. «08:30–09:15» eller «Lunsj»',
-      onchange: e => { row.label = e.target.value.trim() || row.label; save(); } }),
+      oninput: debounced(e => {
+        const v = e.target.value.trim();
+        if (v) { row.label = v; store.setTimetable(cls.id, tt); }
+      }) }),
     h('div', { class: 'seg' },
       segBtn('Skoletime', row.type !== 'pause', () => setType('time')),
       segBtn('Friminutt', row.type === 'pause', () => setType('pause'))),
@@ -167,20 +184,18 @@ function rowEditor(cls, tt) {
 
 function cellEditor(cls, tt, fagListe) {
   const key = selCell.row + ':' + selCell.day;
-  const cell = tt.cells[key] || {};
+  const cell = tt.cells[key] || (tt.cells[key] = {});
   const rowLabel = tt.rows.find(r => r.id === selCell.row)?.label || '';
-  const save = patch => {
-    const next = { ...cell, ...patch };
-    if (!next.fag && !next.rom && !next.info) delete tt.cells[key];
-    else tt.cells[key] = next;
+  const save = patch => {           // med re-render – brukes av chips/knapper
+    Object.assign(cell, patch);
     store.setTimetable(cls.id, tt);
     rr();
   };
   const nyInput = h('input', { class: 'input', placeholder: 'Annet fag …' });
   const romInput = h('input', { class: 'input', placeholder: 'Rom (valgfritt)', value: cell.rom || '',
-    onchange: e => save({ rom: e.target.value.trim() }) });
+    oninput: debounced(e => { cell.rom = e.target.value.trim(); store.setTimetable(cls.id, tt); }) });
   const infoInput = h('input', { class: 'input', placeholder: 'Lærer/notat (valgfritt)', value: cell.info || '',
-    onchange: e => save({ info: e.target.value.trim() }) });
+    oninput: debounced(e => { cell.info = e.target.value.trim(); store.setTimetable(cls.id, tt); }) });
   return h('div', { class: 'contextbar no-print' },
     h('strong', {}, `${DAYS_FULL[selCell.day]} · ${rowLabel}`),
     cell.fag && h('button', { class: 'btn small danger', onclick: () => save({ fag: '', rom: '', info: '' }) }, 'Tøm rute'),

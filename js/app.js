@@ -81,3 +81,7 @@ route();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js');
 }
+
+// Be nettleseren om varig lagring – demper Safaris 7-dagers-sletting av
+// data for sider som ikke besøkes på en stund.
+if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});

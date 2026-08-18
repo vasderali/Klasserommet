@@ -1,9 +1,15 @@
+import { toast } from './ui.js';
+
 const KEY = 'klasserommet:v1';
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
 function blank() {
-  return { classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {}, timetables: {}, activities: [], currentClassId: null };
+  return {
+    classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {},
+    timetables: {}, activities: [], currentClassId: null,
+    meta: { lastExportAt: 0, changes: 0 },
+  };
 }
 
 let state = load();
@@ -15,13 +21,37 @@ function load() {
   } catch { return blank(); }
 }
 
+// Lagringsfeil (full/blokkert lagring) skal aldri være stille – læreren må
+// få vite at endringene ikke ble lagret.
+let lastSaveErrorAt = 0;
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* full disk o.l. */ }
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch {
+    if (Date.now() - lastSaveErrorAt > 30000) {
+      lastSaveErrorAt = Date.now();
+      toast('⚠️ Kunne ikke lagre! Lagringen er full eller blokkert – ta en sikkerhetskopi nå.');
+    }
+  }
 }
 
 const listeners = new Set();
 export function onChange(fn) { listeners.add(fn); }
-function emit() { save(); listeners.forEach(f => f()); }
+function emit() {
+  state.meta = state.meta || { lastExportAt: 0, changes: 0 };
+  state.meta.changes = (state.meta.changes || 0) + 1;
+  save();
+  listeners.forEach(f => f());
+}
+
+// Har appen flere åpne faner, henter de andre inn endringene i stedet for å
+// overskrive dem med gammel tilstand.
+window.addEventListener('storage', e => {
+  if (e.key !== KEY) return;
+  state = load();
+  listeners.forEach(f => f());
+  window.dispatchEvent(new Event('lh:rerender'));
+});
 
 export const store = {
   uid,
@@ -109,11 +139,18 @@ export const store = {
   },
   deleteActivity(id) { state.activities = this.activities().filter(a => a.id !== id); emit(); },
 
-  exportJson() { return JSON.stringify(state, null, 2); },
+  meta() { return state.meta || { lastExportAt: 0, changes: 0 }; },
+  markExported() {
+    state.meta = { lastExportAt: Date.now(), changes: 0 };
+    save();
+  },
+
+  exportJson() { return JSON.stringify({ version: 1, ...state }, null, 2); },
   importJson(text) {
     const s = JSON.parse(text);
     if (!s || !Array.isArray(s.classes)) throw new Error('Ugyldig fil');
-    state = Object.assign(blank(), s);
+    const { version, ...rest } = s;
+    state = Object.assign(blank(), rest);
     emit();
   },
   wipe() { state = blank(); emit(); },

@@ -105,14 +105,21 @@ function dataPanel() {
       if (!f) return;
       const r = new FileReader();
       r.onload = () => {
+        if (!confirm('Importere sikkerhetskopien? Dette ERSTATTER alle data på denne enheten.')) { e.target.value = ''; return; }
         try { store.importJson(r.result); toast('Data importert.'); rr(); }
         catch { alert('Kunne ikke lese filen – er det en sikkerhetskopi fra Klasserommet?'); }
       };
       r.readAsText(f);
     } });
+  const meta = store.meta();
+  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+  const needBackup = (meta.changes || 0) >= 25 ||
+    (meta.lastExportAt > 0 && Date.now() - meta.lastExportAt > THIRTY_DAYS && (meta.changes || 0) > 0);
   return h('div', { class: 'panel' },
     h('h3', {}, 'Dine data'),
     h('p', { class: 'muted' }, 'Alt lagres kun lokalt på denne enheten – ingenting sendes til noen server. Ta en sikkerhetskopi i blant, eller bruk den til å flytte alt til en annen enhet.'),
+    needBackup && h('div', { class: 'contextbar' },
+      h('span', {}, '💾 Det har skjedd mye siden forrige sikkerhetskopi – ta en eksport, så er du trygg om noe skulle skje med enheten.')),
     h('div', { class: 'row wrap' },
       h('button', { class: 'btn', onclick: exportData }, '⬇️ Eksporter sikkerhetskopi'),
       h('button', { class: 'btn', onclick: () => fileIn.click() }, '⬆️ Importer'),
@@ -131,4 +138,6 @@ function exportData() {
   document.body.append(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  store.markExported();
+  rr();
 }

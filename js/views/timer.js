@@ -10,6 +10,26 @@ let full = false;
 let audioCtx = null;
 let ticking = false;
 
+// Skjermen skal ikke slukke midt i en nedtelling på projektoren. Hentes på
+// nytt fra tick() hvis den slippes (f.eks. etter fanebytte).
+let wakeLock = null;
+let wakeAttemptAt = 0;
+function syncWakeLock() {
+  const want = running || full;
+  if (want && !wakeLock && 'wakeLock' in navigator &&
+      document.visibilityState === 'visible' && Date.now() - wakeAttemptAt > 3000) {
+    wakeAttemptAt = Date.now();
+    navigator.wakeLock.request('screen').then(l => {
+      wakeLock = l;
+      l.addEventListener('release', () => { wakeLock = null; });
+    }).catch(() => { /* ikke kritisk */ });
+  } else if (!want && wakeLock) {
+    wakeLock.release().catch(() => {});
+    wakeLock = null;
+  }
+}
+document.addEventListener('visibilitychange', syncWakeLock);
+
 export function render(root) {
   if (!ticking) { setInterval(tick, 200); ticking = true; }
   root.append(h('section', { class: 'view timer-view' + (full ? ' full' : '') },
@@ -66,6 +86,7 @@ function ensureAudio() {
 }
 
 function tick() {
+  syncWakeLock();
   if (running) {
     const left = endAt - Date.now();
     if (left <= 0) {
