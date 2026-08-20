@@ -1,6 +1,6 @@
 // Cache-først med oppdatering i bakgrunnen: appen virker uten nett i
 // klasserommet, og nye versjoner hentes stille neste gang det er nett.
-const VERSION = 'klasserommet-v11';
+const VERSION = 'klasserommet-v12';
 
 const ASSETS = [
   '.',
@@ -22,6 +22,7 @@ const ASSETS = [
   'js/views/aktiviteter.js',
   'js/views/tavle.js',
   'js/views/stoy.js',
+  'js/views/stasjoner.js',
   'js/views/klasser.js',
   'icons/favicon.svg',
   'icons/icon-180.png',

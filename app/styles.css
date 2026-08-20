@@ -804,6 +804,45 @@ main.view-enter[data-dir="b"] > * { animation-name: viewInB; }
 .stoy-meter { height: 14px; border-radius: 999px; background: var(--surface-dim); overflow: hidden; }
 .stoy-meter-fill { height: 100%; width: 0; background: var(--brand); border-radius: 999px; transition: width .12s linear; }
 
+/* ---------- Stasjoner ---------- */
+
+.stasjon-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.stasjon-timer { font-size: clamp(48px, 8vw, 96px); }
+
+.stasjon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.stasjon-card { margin-bottom: 0; border-color: rgba(0, 0, 0, .06); }
+.stasjon-tittel { font-weight: 800; font-size: 17px; }
+.stasjon-gruppe { font-size: 12.5px; font-weight: 600; color: rgba(34, 48, 42, .55); margin-bottom: 6px; }
+.stasjon-card ul { margin: 0; padding-left: 18px; line-height: 1.65; font-weight: 600; }
+
+.stasjon-view.full {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  margin: 0;
+  padding: calc(20px + env(safe-area-inset-top)) 30px 30px;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.stasjon-view.full .stasjon-timer { font-size: clamp(80px, 12vw, 160px); }
+.stasjon-view.full .stasjon-card ul { font-size: clamp(15px, 1.8vw, 22px); }
+.stasjon-view.full .stasjon-tittel { font-size: clamp(17px, 2vw, 24px); }
+.stasjon-exit { position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 18px; z-index: 61; }
+
 /* ---------- Vikarpakke-utskrift ---------- */
 
 .vikar-print { display: none; }

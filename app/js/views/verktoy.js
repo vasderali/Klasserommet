@@ -11,6 +11,7 @@ const TOOLS = [
   ['trekker', 'Trekker', 'Trekk elevnavn – alle trekkes én gang før noen trekkes igjen.'],
   ['timer', 'Timer', 'Stor nedtelling for tavla og projektoren, med tavlemodus.'],
   ['tavle', 'Dagens plan', 'Dagens økter fra timeplanen på storskjerm – med klokke og avhuking.'],
+  ['stasjoner', 'Stasjoner', 'Stasjonsundervisning: grupper, stasjoner og rotasjonstimer på tavla.'],
   ['stoy', 'Støymåler', 'Trafikklys for arbeidsro – lyden analyseres kun på enheten.'],
   ['timeplan', 'Timeplan', 'Ukeplan med fargekodede fag – for klassen eller hele trinnet.'],
   ['aktiviteter', 'Aktivitetsbank', 'Dine aktiviteter og opplegg – filtrer på fag, område og sted.'],
