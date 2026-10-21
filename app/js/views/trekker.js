@@ -1,12 +1,14 @@
 import { store } from '../store.js';
-import { h, emptyState, rerenderView as rr } from '../ui.js';
+import { h, fmtDate, toast, emptyState, segBtn, rerenderView as rr } from '../ui.js';
 
 let spinning = false;
 let justDrawn = false;
+let mode = 'en'; // 'en' = trekk én | 'rekkefolge' = fremføringsrekkefølge
 
 export function render(root) {
   const cls = store.currentClass();
   if (!cls) { root.append(emptyState('Lag en klasse først, så kan du trekke navn.', '🎲')); return; }
+  if (mode === 'rekkefolge') { renderOrder(root, cls); return; }
   const p = store.picker(cls.id);
   const valid = new Set(cls.students.map(s => s.id));
   p.drawn = p.drawn.filter(id => valid.has(id));
@@ -20,7 +22,9 @@ export function render(root) {
   justDrawn = false;
 
   root.append(h('section', { class: 'view' },
-    h('div', { class: 'view-head' }, h('h2', {}, 'Trekk et navn')),
+    h('div', { class: 'view-head' },
+      h('h2', {}, 'Trekker'),
+      modeSeg()),
     h('div', { class: 'panel draw-panel' },
       display,
       h('div', { class: 'row center' },
@@ -53,6 +57,76 @@ export function render(root) {
           },
         }, drawnIdx >= 0 ? `${drawnIdx + 1}. ${s.name}` : s.name);
       })))));
+}
+
+function modeSeg() {
+  return h('div', { class: 'seg' },
+    segBtn('Trekk én', mode === 'en', () => { mode = 'en'; rr(); }),
+    segBtn('Rekkefølge', mode === 'rekkefolge', () => { mode = 'rekkefolge'; rr(); }));
+}
+
+// Fremføringsrekkefølge: trekk en tilfeldig rekkefølge én gang, og kryss av
+// etter hvert som elevene har fremført – den vedvarer over flere dager.
+function renderOrder(root, cls) {
+  const ord = store.order(cls.id);
+  const p = store.picker(cls.id);
+  const valid = new Set(cls.students.map(s => s.id));
+  ord.order = ord.order.filter(id => valid.has(id));
+  ord.done = ord.done.filter(id => valid.has(id));
+  const nameOf = id => cls.students.find(s => s.id === id)?.name;
+
+  const trekk = () => {
+    const present = cls.students.filter(s => !p.absent.includes(s.id));
+    if (present.length < 2) { toast('For få elever til å trekke rekkefølge.'); return; }
+    const ids = present.map(s => s.id);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    ord.order = ids;
+    ord.done = [];
+    ord.at = Date.now();
+    store.saveOrder();
+    toast('Rekkefølgen er trukket – ingen kan klage på læreren! 🎲');
+    rr();
+  };
+
+  const view = h('section', { class: 'view' },
+    h('div', { class: 'view-head no-print' },
+      h('h2', {}, 'Trekker'),
+      modeSeg()),
+    h('div', { class: 'row wrap no-print', style: 'margin-bottom:12px' },
+      h('button', { class: 'btn primary', onclick: () => {
+        if (!ord.order.length || confirm('Trekke ny rekkefølge? Den gamle forsvinner.')) trekk();
+      } }, '🎲 Trekk rekkefølge'),
+      ord.order.length ? h('button', { class: 'btn', onclick: () => {
+        document.body.classList.add('print-mode');
+        window.print();
+      } }, '🖨 Skriv ut') : null));
+
+  if (!ord.order.length) {
+    view.append(h('div', { class: 'panel' },
+      h('p', {}, 'Trekk en tilfeldig rekkefølge for fremføringer eller presentasjoner. Lista blir stående til du trekker en ny – kryss av underveis, også om fremføringene går over flere dager.'),
+      p.absent.length ? h('p', { class: 'muted small' }, 'Elever markert som fraværende i «Trekk én» holdes utenfor.') : null));
+  } else {
+    view.append(h('div', { class: 'print-caption' }, `${cls.name} · fremføringsrekkefølge · ${fmtDate(ord.at)}`));
+    view.append(h('p', { class: 'muted no-print' },
+      `${ord.done.length} av ${ord.order.length} ferdige · trykk på et navn for å krysse av`));
+    view.append(h('div', { class: 'panel' },
+      h('ol', { class: 'rekkefolge-liste' }, ord.order.map(id => {
+        const done = ord.done.includes(id);
+        return h('li', {},
+          h('button', {
+            class: 'rekkefolge-navn' + (done ? ' done' : ''),
+            onclick: () => {
+              ord.done = done ? ord.done.filter(x => x !== id) : [...ord.done, id];
+              store.saveOrder();
+              rr();
+            },
+          }, nameOf(id)));
+      }))));
+  }
+  root.append(view);
 }
 
 function draw(p, remaining, display) {

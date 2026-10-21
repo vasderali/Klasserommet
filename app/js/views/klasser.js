@@ -79,7 +79,7 @@ function vikarPrint(c) {
     h('p', { class: 'muted' },
       new Date().toLocaleDateString('nb-NO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })),
     chart && chart.desks.some(d => d.sid) ? [
-      h('h2', {}, 'Klassekart (tavla nederst – sett fra deg)'),
+      h('h2', {}, `Klassekart: ${chart.name} (tavla nederst – sett fra deg)`),
       staticBoard(chart.desks, c),
     ] : null,
     rules.length ? [

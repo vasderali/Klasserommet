@@ -8,10 +8,12 @@ const DEMO_NAVN = ['Emma', 'Noah', 'Olivia', 'Liam', 'Ella', 'Oskar', 'Maja', 'A
 const TOOLS = [
   ['kart', 'Klassekart', 'Plasser pulter, fyll tilfeldig med regler, historikk og utskrift.'],
   ['grupper', 'Grupper', 'Tilfeldige grupper som unngår de samme parene som sist.'],
+  ['partnere', 'Læringspartnere', 'Nye par når du vil – alle får jobbet med alle etter hvert.'],
   ['trekker', 'Trekker', 'Trekk elevnavn – alle trekkes én gang før noen trekkes igjen.'],
   ['timer', 'Timer', 'Stor nedtelling for tavla og projektoren, med tavlemodus.'],
   ['tavle', 'Dagens plan', 'Dagens økter fra timeplanen på storskjerm – med klokke og avhuking.'],
   ['stasjoner', 'Stasjoner', 'Stasjonsundervisning: grupper, stasjoner og rotasjonstimer på tavla.'],
+  ['jobber', 'Klasseromsjobber', 'Jobbene roterer rettferdig – de som har ventet lengst, står først i køen.'],
   ['stoy', 'Støymåler', 'Trafikklys for arbeidsro – lyden analyseres kun på enheten.'],
   ['timeplan', 'Timeplan', 'Ukeplan med fargekodede fag – for klassen eller hele trinnet.'],
   ['aktiviteter', 'Aktivitetsbank', 'Dine aktiviteter og opplegg – filtrer på fag, område og sted.'],

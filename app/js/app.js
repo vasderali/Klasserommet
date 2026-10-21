@@ -10,17 +10,21 @@ import * as aktiviteter from './views/aktiviteter.js';
 import * as tavle from './views/tavle.js';
 import * as stoy from './views/stoy.js';
 import * as stasjoner from './views/stasjoner.js';
+import * as partnere from './views/partnere.js';
+import * as jobber from './views/jobber.js';
 import * as klasser from './views/klasser.js';
 
-const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, tavle, stoy, stasjoner, klasser };
-const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter', 'tavle', 'stoy', 'stasjoner']);
+const views = { verktoy, kart, grupper, trekker, timer, timeplan, aktiviteter, tavle, stoy, stasjoner, partnere, jobber, klasser };
+const TOOLS = new Set(['kart', 'grupper', 'trekker', 'timer', 'timeplan', 'aktiviteter', 'tavle', 'stoy', 'stasjoner', 'partnere', 'jobber']);
 const TOOL_TABS = [
   ['kart', 'Kart'],
   ['grupper', 'Grupper'],
+  ['partnere', 'Partnere'],
   ['trekker', 'Trekker'],
   ['timer', 'Timer'],
   ['tavle', 'Tavle'],
   ['stasjoner', 'Stasjoner'],
+  ['jobber', 'Jobber'],
   ['stoy', 'Støy'],
   ['timeplan', 'Plan'],
   ['aktiviteter', 'Bank'],
@@ -38,7 +42,7 @@ function toolNav(active) {
 }
 
 let lastKey = null;
-const NAV_ORDER = ['verktoy', 'kart', 'grupper', 'trekker', 'timer', 'tavle', 'stasjoner', 'stoy', 'timeplan', 'aktiviteter', 'klasser'];
+const NAV_ORDER = ['verktoy', 'kart', 'grupper', 'partnere', 'trekker', 'timer', 'tavle', 'stasjoner', 'jobber', 'stoy', 'timeplan', 'aktiviteter', 'klasser'];
 
 function route() {
   const name = location.hash.replace(/^#\//, '') || 'verktoy';

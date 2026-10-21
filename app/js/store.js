@@ -7,17 +7,40 @@ function uid() { return Math.random().toString(36).slice(2, 10); }
 function blank() {
   return {
     classes: [], charts: {}, chartHistory: {}, groupHistory: {}, picker: {},
-    timetables: {}, activities: [], currentClassId: null,
+    timetables: {}, activities: [], partnerRounds: {}, jobs: {}, order: {},
+    currentClassId: null,
     meta: { lastExportAt: 0, changes: 0 },
   };
 }
 
 let state = load();
 
+// v1 → v2: fra ett kart per klasse til flere navngitte kart, med historikk
+// per kart. Kjøres på både innlasting og import av gamle sikkerhetskopier.
+function migrate(s) {
+  Object.keys(s.charts || {}).forEach(cid => {
+    const c = s.charts[cid];
+    if (c && Array.isArray(c.desks)) {
+      const id = uid();
+      s.charts[cid] = { list: [{ id, name: 'Klasserommet', desks: c.desks }], activeId: id };
+      const oldHist = s.chartHistory?.[cid];
+      s.chartHistory[cid] = Array.isArray(oldHist) ? { [id]: oldHist } : (oldHist || {});
+    }
+  });
+  Object.keys(s.chartHistory || {}).forEach(cid => {
+    if (Array.isArray(s.chartHistory[cid])) {
+      const id = uid();
+      s.charts[cid] = s.charts[cid] || { list: [{ id, name: 'Klasserommet', desks: [] }], activeId: id };
+      s.chartHistory[cid] = { [s.charts[cid].activeId]: s.chartHistory[cid] };
+    }
+  });
+  return s;
+}
+
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    return s && Array.isArray(s.classes) ? Object.assign(blank(), s) : blank();
+    return s && Array.isArray(s.classes) ? migrate(Object.assign(blank(), s)) : blank();
   } catch { return blank(); }
 }
 
@@ -76,6 +99,9 @@ export const store = {
     delete state.groupHistory[id];
     delete state.picker[id];
     delete state.timetables[id];
+    delete state.partnerRounds[id];
+    delete state.jobs[id];
+    delete state.order[id];
     if (state.currentClassId === id) state.currentClassId = state.classes[0]?.id ?? null;
     emit();
   },
@@ -90,8 +116,7 @@ export const store = {
     c.apart = (c.apart || []).filter(([a, b]) => a !== sid && b !== sid);
     c.together = (c.together || []).filter(([a, b]) => a !== sid && b !== sid);
     c.front = (c.front || []).filter(x => x !== sid);
-    const chart = state.charts[cid];
-    if (chart) chart.desks.forEach(d => { if (d.sid === sid) d.sid = null; });
+    (state.charts[cid]?.list || []).forEach(k => k.desks.forEach(d => { if (d.sid === sid) d.sid = null; }));
     const p = state.picker[cid];
     if (p) {
       p.drawn = p.drawn.filter(x => x !== sid);
@@ -106,19 +131,75 @@ export const store = {
   addFront(cid, sid) { const c = this.getClass(cid); if (!c) return; (c.front = c.front || []).push(sid); emit(); },
   removeFront(cid, i) { const c = this.getClass(cid); if (!c) return; c.front.splice(i, 1); emit(); },
 
-  chart(cid) { return state.charts[cid] || null; },
-  setChart(cid, chart) { state.charts[cid] = chart; emit(); },
+  // Flere navngitte kart per klasse; «chart» uten id = det aktive kartet.
+  charts(cid) {
+    const c = state.charts[cid];
+    return c && Array.isArray(c.list) ? c.list : [];
+  },
+  chart(cid) {
+    const c = state.charts[cid];
+    if (!c || !c.list?.length) return null;
+    return c.list.find(x => x.id === c.activeId) || c.list[0];
+  },
+  ensureChart(cid) {
+    let c = state.charts[cid];
+    if (!c || !Array.isArray(c.list)) c = state.charts[cid] = { list: [], activeId: null };
+    let active = c.list.find(x => x.id === c.activeId) || c.list[0];
+    if (!active) {
+      active = { id: uid(), name: 'Klasserommet', desks: [] };
+      c.list.push(active);
+      c.activeId = active.id;
+    }
+    return active;
+  },
+  setChart(cid, chartLike) {
+    const c = this.ensureChart(cid);
+    if (chartLike?.desks && chartLike.desks !== c.desks) c.desks = chartLike.desks;
+    emit();
+  },
+  addChart(cid, name) {
+    let c = state.charts[cid];
+    if (!c || !Array.isArray(c.list)) c = state.charts[cid] = { list: [], activeId: null };
+    const nc = { id: uid(), name, desks: [] };
+    c.list.push(nc);
+    c.activeId = nc.id;
+    emit();
+    return nc;
+  },
+  renameChart(cid, chartId, name) {
+    const k = this.charts(cid).find(x => x.id === chartId);
+    if (k) { k.name = name; emit(); }
+  },
+  deleteChart(cid, chartId) {
+    const c = state.charts[cid]; if (!c) return;
+    c.list = c.list.filter(x => x.id !== chartId);
+    if (state.chartHistory[cid]) delete state.chartHistory[cid][chartId];
+    if (c.activeId === chartId) c.activeId = c.list[0]?.id ?? null;
+    emit();
+  },
+  setActiveChart(cid, chartId) {
+    const c = state.charts[cid];
+    if (c) { c.activeId = chartId; emit(); }
+  },
 
-  history(cid) { return state.chartHistory[cid] || []; },
+  history(cid) {
+    const active = this.chart(cid);
+    if (!active) return [];
+    return state.chartHistory[cid]?.[active.id] || [];
+  },
   saveSnapshot(cid, desks) {
-    const h = state.chartHistory[cid] || (state.chartHistory[cid] = []);
+    const active = this.ensureChart(cid);
+    const hc = state.chartHistory[cid] || (state.chartHistory[cid] = {});
+    const h = hc[active.id] || (hc[active.id] = []);
     h.unshift({ id: uid(), at: Date.now(), desks: JSON.parse(JSON.stringify(desks)) });
     if (h.length > 25) h.length = 25;
     emit();
   },
   deleteSnapshot(cid, id) {
-    const h = state.chartHistory[cid]; if (!h) return;
-    state.chartHistory[cid] = h.filter(s => s.id !== id);
+    const active = this.chart(cid);
+    const h = state.chartHistory[cid]?.[active?.id];
+    if (!h) return;
+    state.chartHistory[cid][active.id] = h.filter(s => s.id !== id);
     emit();
   },
 
@@ -135,6 +216,30 @@ export const store = {
 
   timetable(cid) { return state.timetables[cid] || null; },
   setTimetable(cid, tt) { state.timetables[cid] = tt; emit(); },
+
+  // Læringspartnere: runde 0 er den gjeldende, resten er historikk som
+  // trekningen bruker for å unngå gjentak.
+  partnerRounds(cid) { return state.partnerRounds[cid] || (state.partnerRounds[cid] = []); },
+  addPartnerRound(cid, groups) {
+    const h = this.partnerRounds(cid);
+    h.unshift({ id: uid(), at: Date.now(), groups: JSON.parse(JSON.stringify(groups)) });
+    if (h.length > 30) h.length = 30;
+    emit();
+  },
+
+  // Klasseromsjobber: liste over jobber + runder med tildelinger.
+  jobs(cid) {
+    return state.jobs[cid] || (state.jobs[cid] = { list: [], rounds: [] });
+  },
+  saveJobs(cid) {
+    const j = this.jobs(cid);
+    if (j.rounds.length > 40) j.rounds.length = 40;
+    emit();
+  },
+
+  // Fremføringsrekkefølge (vedvarer – fremføringer går gjerne over flere dager).
+  order(cid) { return state.order[cid] || (state.order[cid] = { at: 0, order: [], done: [] }); },
+  saveOrder() { emit(); },
 
   // Aktivitetsbanken er personlig, ikke knyttet til klasse.
   activities() { return state.activities || (state.activities = []); },
@@ -156,7 +261,7 @@ export const store = {
     const s = JSON.parse(text);
     if (!s || !Array.isArray(s.classes)) throw new Error('Ugyldig fil');
     const { version, ...rest } = s;
-    state = Object.assign(blank(), rest);
+    state = migrate(Object.assign(blank(), rest));
     emit();
   },
   wipe() { state = blank(); emit(); },

@@ -36,8 +36,9 @@ export function render(root) {
 }
 
 function sanitizeChart(cls) {
+  // Flyktig standardkart til første endring – setChart oppretter det ekte.
   let chart = store.chart(cls.id);
-  if (!chart || !Array.isArray(chart.desks)) chart = { desks: [] };
+  if (!chart || !Array.isArray(chart.desks)) chart = { id: null, name: 'Klasserommet', desks: [] };
   const valid = new Set(cls.students.map(s => s.id));
   chart.desks.forEach(d => { if (d.sid && !valid.has(d.sid)) d.sid = null; });
   return chart;
@@ -47,6 +48,30 @@ function buildEditor(cls) {
   const chart = sanitizeChart(cls);
   if (selected && !chart.desks.some(d => d.id === selected)) selected = null;
   const box = h('div', {});
+
+  // Flere kart per klasse: klasserommet, naturfagrommet, garderoben …
+  const chartsList = store.charts(cls.id);
+  box.append(h('div', { class: 'row wrap no-print chartbar' },
+    chartsList.length > 1 ? h('select', {
+      class: 'input', 'aria-label': 'Velg kart',
+      onchange: e => { store.setActiveChart(cls.id, e.target.value); selected = null; rr(); },
+    }, chartsList.map(k => h('option', { value: k.id, selected: k.id === chart.id }, k.name))) :
+      h('strong', {}, chart.name),
+    h('button', { class: 'btn small', onclick: () => {
+      const name = prompt('Navn på det nye kartet:', 'Naturfagrommet');
+      if (name?.trim()) { store.addChart(cls.id, name.trim()); selected = null; rr(); }
+    } }, '+ Nytt kart'),
+    h('button', { class: 'btn small', 'aria-label': 'Gi kartet nytt navn', onclick: () => {
+      const name = prompt('Nytt navn på kartet:', chart.name);
+      if (name?.trim() && chart.id) { store.renameChart(cls.id, chart.id, name.trim()); rr(); }
+    } }, '✎'),
+    chartsList.length > 1 ? h('button', { class: 'btn small danger', 'aria-label': 'Slett dette kartet', onclick: () => {
+      if (confirm(`Slette kartet «${chart.name}» med historikken sin?`)) {
+        store.deleteChart(cls.id, chart.id);
+        selected = null;
+        rr();
+      }
+    } }, '🗑') : null));
 
   const presetSel = h('select', { class: 'input no-print', 'aria-label': 'Velg pultoppsett', onchange: e => applyPreset(cls, chart, e.target.value) },
     h('option', { value: '' }, 'Nytt oppsett …'),
@@ -102,7 +127,7 @@ function buildEditor(cls) {
   }
 
   box.append(h('div', { class: 'print-caption' },
-    `${cls.name} · ${new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })}`));
+    `${cls.name} · ${chart.name} · ${new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })}`));
 
   if (!chart.desks.length) {
     box.append(h('div', { class: 'panel no-print' },
